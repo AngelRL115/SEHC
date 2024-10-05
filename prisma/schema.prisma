@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model service {
+  idService         Int       @id @unique(map: "idService_UNIQUE")
+  serviceType       String?   @db.VarChar(45)
+  serviceDetails    Json?
+  serviceDate       DateTime? @db.Timestamp(0)
+  serviceStatus     String?   @db.VarChar(45)
+  totalCost         String?   @db.VarChar(45)
+  serviceNotes      String?   @db.VarChar(1000)
+  Vehicle_idVehicle Int
+  User_idUser       Int
+  createdAt         DateTime? @db.Timestamp(0)
+  updatedAt         DateTime? @db.Timestamp(0)
+
+  @@index([User_idUser], map: "fk_Service_User1_idx")
+  @@index([Vehicle_idVehicle], map: "fk_Service_Vehicle1_idx")
+}
+
+model user {
+  idUser    Int       @id @unique(map: "idUser_UNIQUE") @default(autoincrement())
+  username  String    @db.VarChar(45)
+  password  String    @db.VarChar(45)
+  name      String    @db.VarChar(45)
+  lastName  String    @db.VarChar(45)
+  createdAt DateTime? @db.Timestamp(0)
+  updatedAt DateTime? @db.Timestamp(0)
+}
+
+model vehicle {
+  idVehicle Int       @id @unique(map: "idVehicle_UNIQUE")
+  brand     String?   @db.VarChar(45)
+  model     String?   @db.VarChar(45)
+  year      String?   @db.VarChar(45)
+  plate     String?   @db.VarChar(45)
+  createdAt DateTime? @db.Timestamp(0)
+  updatedAt DateTime? @db.Timestamp(0)
+}
