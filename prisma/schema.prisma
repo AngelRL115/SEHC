@@ -17,8 +17,8 @@ model service {
   serviceNotes      String?   @db.VarChar(1000)
   Vehicle_idVehicle Int
   User_idUser       Int
-  createdAt         DateTime? @db.Timestamp(0)
-  updatedAt         DateTime? @db.Timestamp(0)
+  createdAt         DateTime @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime @default(now()) @db.Timestamp(0)
 
   @@index([User_idUser], map: "fk_Service_User1_idx")
   @@index([Vehicle_idVehicle], map: "fk_Service_Vehicle1_idx")
@@ -30,8 +30,8 @@ model user {
   password  String    @db.VarChar(45)
   name      String    @db.VarChar(45)
   lastName  String    @db.VarChar(45)
-  createdAt DateTime? @db.Timestamp(0)
-  updatedAt DateTime? @db.Timestamp(0)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
 }
 
 model vehicle {
@@ -40,6 +40,6 @@ model vehicle {
   model     String?   @db.VarChar(45)
   year      String?   @db.VarChar(45)
   plate     String?   @db.VarChar(45)
-  createdAt DateTime? @db.Timestamp(0)
-  updatedAt DateTime? @db.Timestamp(0)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
 }
