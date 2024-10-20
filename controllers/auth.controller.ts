@@ -7,7 +7,7 @@ import * as dotenv from 'dotenv'
 import { error } from 'console'
 dotenv.config()
 
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUserPassword = async (req: Request, res: Response) => {
     const {username, password, name, lastName} = req.body
     let responseStatus = StatusCodes.OK
     let responseContents
@@ -45,7 +45,7 @@ export const registerUser = async (req: Request, res: Response) => {
     res.status(responseStatus).send(responseContents)
 }
 
-export const login = async (req: Request, res: Response) => {
+export const loginPassword = async (req: Request, res: Response) => {
     const {username, password} = req.body
     let responseStatus = StatusCodes.OK
     let responseContents
@@ -77,6 +77,82 @@ export const login = async (req: Request, res: Response) => {
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
 		responseContents = { error: error }
 		return res.status(responseStatus).send(responseContents)
+    }
+    res.status(responseStatus).send(responseContents)
+}
+
+// Función de registro de usuarios sin contraseña
+export const registerUser = async (req: Request, res: Response) => {
+    const { username, name, lastName } = req.body
+    let responseStatus = StatusCodes.OK
+    let responseContents
+
+    try {
+        // Validar que los campos requeridos estén presentes
+        if (!username || !name || !lastName) {
+            responseStatus = StatusCodes.BAD_REQUEST
+            responseContents = { error: 'All fields are required' }
+            return res.status(responseStatus).send(responseContents)
+        }
+
+        // Verificar si el nombre de usuario ya existe
+        const existingUsername = await prisma.user.findFirst({ where: { username: username } })
+
+        if (existingUsername) {
+            responseStatus = StatusCodes.BAD_REQUEST
+            responseContents = { error: 'Username already taken' }
+            return res.status(responseStatus).send(responseContents)
+        }
+
+        // Crear el usuario sin contraseña
+        const newUser = await prisma.user.create({
+            data: {
+                username: username,
+                name: name,
+                lastName: lastName,
+            }
+        })
+        responseContents = { message: `User with username ${newUser.username} created` }
+
+    } catch (error) {
+        console.error(`[POST] authController/registerUser error: ${error}`)
+        responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+        responseContents = { error: error }
+        return res.status(responseStatus).send(responseContents)
+    }
+    res.status(responseStatus).send(responseContents)
+}
+
+// Función de login sin contraseña
+export const login = async (req: Request, res: Response) => {
+    const { username } = req.body
+    let responseStatus = StatusCodes.OK
+    let responseContents
+    try {
+        // Validar que el nombre de usuario esté presente
+        if (!username) {
+            responseStatus = StatusCodes.BAD_REQUEST
+            responseContents = { error: 'Username not provided' }
+            return res.status(responseStatus).send(responseContents)
+        }
+
+        // Verificar si el nombre de usuario es válido
+        const validUsername = await prisma.user.findFirst({ where: { username: username } })
+        if (!validUsername) {
+            responseStatus = StatusCodes.BAD_REQUEST
+            responseContents = { error: 'Username does not exist' }
+            return res.status(responseStatus).send(responseContents)
+        }
+
+        // Generar el token JWT sin necesidad de validar la contraseña
+        const token = jwt.sign({ userid: validUsername.idUser }, process.env.JWT_SECRET as string, { expiresIn: '10h' })
+        responseContents = { token }
+
+    } catch (error) {
+        console.error(`[POST] authController/login error: ${error}`)
+        responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+        responseContents = { error: error }
+        return res.status(responseStatus).send(responseContents)
     }
     res.status(responseStatus).send(responseContents)
 }
