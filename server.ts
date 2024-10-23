@@ -4,6 +4,8 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
+const swaggerUi = require('swagger-ui-express')
+const swaggerJsdoc = require('swagger-jsdoc')
 import * as dotenv from 'dotenv'
 dotenv.config()
 
@@ -20,6 +22,26 @@ app.use(bodyParser.json({ limit: '100mb' }))
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }))
 app.disable('x-powered-by')
 
+const swaggerOptions = {
+	definition: {
+		openapi: '3.0.0',
+		info: {
+			title: 'API documentation for SEHC',
+			version: '1.0.0',
+			description: 'Documentacion de los endpoints para el sistema de control de taller especializado honda',
+		},
+		servers: [
+			{
+				url: 'http://localhost:3000/SEHC', //cuando el server este en la nube cambiar esto por la url del servicio
+			},
+		],
+	},
+	apis: ['./routes/*.ts'], // Indica la ubicación de tus rutas para generar la documentación
+}
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions)
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 app.use('/SEHC', baseRouter)
 
 app.use((_req, res) => {

@@ -85,7 +85,7 @@ dotenv.config()
 
 export const registerUser = async (req: Request, res: Response) => {
     const { username, name, lastName } = req.body
-    let responseStatus = StatusCodes.OK
+    let responseStatus = StatusCodes.CREATED
     let responseContents
 
     try {
