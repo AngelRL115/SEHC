@@ -54,6 +54,14 @@ const authRoutes = (baseRouter: Router) => {
      *      responses:
      *          200:
      *              description: Loging exitoso
+     *              content:
+     *                  application/json:
+     *                      schema:
+     *                          type: object
+     *                          properties:
+     *                              token:
+     *                                  type: string
+     *                                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOjI0LCJpYXQiOjE3Mjk2ODE2OTgsImV4cCI6MTcyOTcxNzY5OH0.LHCc_1z74iFmKyccZ_OekPhD0IL5lGOpUa1nLP7ppTI"
      *          400:
      *              description: Error al hacer login, revisar solicitud
      */
