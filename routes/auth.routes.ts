@@ -9,7 +9,7 @@ const authRoutes = (baseRouter: Router) => {
      * @swagger
      * /auth/registerUser:
      *  post:
-     *      sumary: Crear un nuevo usuario
+     *      summary: Crear un nuevo usuario
      *      tags: [Auth]
      *      requestBody:
      *          required: true
@@ -39,7 +39,7 @@ const authRoutes = (baseRouter: Router) => {
      * @swagger
      * /auth/login:
      *  post:
-     *      sumary: Acceder al sistema
+     *      summary: Acceder al sistema
      *      tags: [Auth]
      *      requestBody:
      *          required: true

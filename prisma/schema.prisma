@@ -79,3 +79,16 @@ model service_type {
   idservice_type Int     @id @unique(map: "idservice_type_UNIQUE")
   service        String? @db.VarChar(45)
 }
+
+model invoice_client_data {
+  idinvoice_client_data Int       @id @unique(map: "idinvoice_client_data_UNIQUE")
+  client_idclient       Int
+  socialReazon          String?   @db.VarChar(100)
+  zipCode               String?   @db.VarChar(10)
+  fiscalRegimen         String?   @db.VarChar(45)
+  email                 String?   @db.VarChar(45)
+  createdAt             DateTime? @default(now()) @db.Timestamp(0)
+  updatedAt             DateTime? @default(now()) @db.Timestamp(0)
+
+  @@index([client_idclient], map: "fk_invoice_client_data_client_idx")
+}

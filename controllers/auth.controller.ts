@@ -1,10 +1,9 @@
 import { Request, Response } from 'express'
-import bcrypt from 'bcrypt'
+//import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
 import * as dotenv from 'dotenv'
-import { error } from 'console'
 dotenv.config()
 
 // export const registerUserPassword = async (req: Request, res: Response) => {
@@ -121,7 +120,7 @@ export const registerUser = async (req: Request, res: Response) => {
         responseContents = { error: error }
         return res.status(responseStatus).send(responseContents)
     }
-    res.status(responseStatus).send(responseContents)
+   return res.status(responseStatus).send(responseContents)
 }
 
 // Función de login sin contraseña
@@ -155,5 +154,5 @@ export const login = async (req: Request, res: Response) => {
         responseContents = { error: error }
         return res.status(responseStatus).send(responseContents)
     }
-    res.status(responseStatus).send(responseContents)
+    return res.status(responseStatus).send(responseContents)
 }
