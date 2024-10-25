@@ -7,7 +7,8 @@
     "start": "node dist/server.ts",
     "dev": "nodemon server.ts",
     "build": "tsc -p .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "powershell.exe -Command \"Remove-Item -Recurse -Force node_modules, package-lock.json; npm install; npx prisma db pull; npx prisma generate\""
   },
   "author": "Angel Rodrigues (6692708747)",
   "license": "ISC",

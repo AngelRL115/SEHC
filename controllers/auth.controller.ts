@@ -1,10 +1,9 @@
 import { Request, Response } from 'express'
-import bcrypt from 'bcrypt'
+//import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
 import * as dotenv from 'dotenv'
-import { error } from 'console'
 dotenv.config()
 
 // export const registerUserPassword = async (req: Request, res: Response) => {
@@ -100,7 +99,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const existingUsername = await prisma.user.findFirst({ where: { username: username } })
 
         if (existingUsername) {
-            responseStatus = StatusCodes.BAD_REQUEST
+            responseStatus = StatusCodes.CONFLICT
             responseContents = { error: 'Username already taken' }
             return res.status(responseStatus).send(responseContents)
         }
@@ -121,7 +120,7 @@ export const registerUser = async (req: Request, res: Response) => {
         responseContents = { error: error }
         return res.status(responseStatus).send(responseContents)
     }
-    res.status(responseStatus).send(responseContents)
+   return res.status(responseStatus).send(responseContents)
 }
 
 // Función de login sin contraseña
@@ -140,8 +139,8 @@ export const login = async (req: Request, res: Response) => {
         // Verificar si el nombre de usuario es válido
         const validUsername = await prisma.user.findFirst({ where: { username: username } })
         if (!validUsername) {
-            responseStatus = StatusCodes.BAD_REQUEST
-            responseContents = { error: 'Username does not exist' }
+            responseStatus = StatusCodes.NOT_ACCEPTABLE
+            responseContents = { error: 'Incorrect username' }
             return res.status(responseStatus).send(responseContents)
         }
 
@@ -155,5 +154,5 @@ export const login = async (req: Request, res: Response) => {
         responseContents = { error: error }
         return res.status(responseStatus).send(responseContents)
     }
-    res.status(responseStatus).send(responseContents)
+    return res.status(responseStatus).send(responseContents)
 }
