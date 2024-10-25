@@ -33,8 +33,8 @@ const clientRoutes = (baseRouter: Router) => {
      *                              example: 6692708747
      *                              required: true
      *                          invoice:
-     *                              type: boolean
-     *                              example: true
+     *                              type: int
+     *                              example: 1
      *                              required: true
      *                          socialReazon:
      *                              type: string

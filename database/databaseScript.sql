@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS `sehc`.`client` (
   UNIQUE INDEX `idcliente_UNIQUE` (`idclient` ASC))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
+ALTER TABLE `sehc`.`client` 
+ADD COLUMN `invoice` INT(2) NULL AFTER `phone`;
 
 
 -- -----------------------------------------------------

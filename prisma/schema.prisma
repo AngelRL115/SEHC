@@ -61,6 +61,7 @@ model client {
   name      String?   @db.VarChar(45)
   lastName  String?   @db.VarChar(45)
   phone     String?   @db.VarChar(45)
+  invoice   Int?
   createdAt DateTime? @default(now()) @db.Timestamp(0)
   updatedAt DateTime? @default(now()) @db.Timestamp(0)
 }

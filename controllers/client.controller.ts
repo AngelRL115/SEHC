@@ -15,14 +15,14 @@ interface Client {
 	fiscalRegimen?: string
 	email?: string
 }
-
+//tengo que modificar el boolean de invoice para que acepte 1 o 0 como indicador de booleano
 export const newClient = async (req: Request, res: Response) => {
 	const { name, lastName, phone, invoice, socialReazon, zipCode, fiscalRegimen, email } = req.body
 
 	let responseStatus = StatusCodes.CREATED
 	let responseContents
 
-	if (!name || !lastName || !phone || invoice === undefined) {
+	if (!name || !lastName || !phone || (invoice !== 0 && invoice !== 1)) {
 		responseStatus = StatusCodes.BAD_REQUEST
 		responseContents = { error: 'name, lastName, phone and invoice fields are required' }
 		return res.status(responseStatus).send(responseContents)
@@ -32,10 +32,10 @@ export const newClient = async (req: Request, res: Response) => {
 		lastName,
 		phone,
 		invoice,
-		socialReazon: invoice ? socialReazon : null,
-		zipCode: invoice ? zipCode : null,
-		fiscalRegimen: invoice ? fiscalRegimen : null,
-		email: invoice ? email : null,
+		socialReazon: invoice === 1 ? socialReazon : null,
+		zipCode: invoice === 1? zipCode : null,
+		fiscalRegimen: invoice === 1 ? fiscalRegimen : null,
+		email: invoice === 1 ? email : null,
 	}
 
 	try {
