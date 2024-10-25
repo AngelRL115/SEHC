@@ -8,20 +8,20 @@ datasource db {
 }
 
 model service {
-  idService                       Int       @id @unique(map: "idService_UNIQUE")
+  idService                       Int      @id @unique(map: "idService_UNIQUE") @default(autoincrement())
   Vehicle_idVehicle               Int
   User_idUser                     Int
   service_status_idservice_status Int
   service_type_idservice_type     Int
   priority_idpriority             Int
-  diagnostic                      String?   @db.VarChar(2000)
-  gasLevel                        String?   @db.VarChar(45)
-  km                              String?   @db.VarChar(45)
+  diagnostic                      String?  @db.VarChar(2000)
+  gasLevel                        String?  @db.VarChar(45)
+  km                              String?  @db.VarChar(45)
   serviceDetails                  Json?
-  totalCost                       String?   @db.VarChar(45)
-  serviceNotes                    String?   @db.VarChar(1000)
-  createdAt                       DateTime? @default(now()) @db.Timestamp(0)
-  updatedAt                       DateTime? @default(now()) @db.Timestamp(0)
+  totalCost                       String?  @db.VarChar(45)
+  serviceNotes                    String?  @db.VarChar(1000)
+  createdAt                       DateTime @default(now()) @db.Timestamp(0)
+  updatedAt                       DateTime @default(now()) @db.Timestamp(0)
 
   @@index([User_idUser], map: "fk_Service_User1_idx")
   @@index([Vehicle_idVehicle], map: "fk_Service_Vehicle1_idx")
@@ -31,65 +31,56 @@ model service {
 }
 
 model user {
-  idUser    Int       @id @unique(map: "idUser_UNIQUE") @default(autoincrement())
-  username  String    @db.VarChar(45)
-  password  String?   @db.VarChar(255)
-  name      String    @db.VarChar(45)
-  lastName  String    @db.VarChar(45)
-  createdAt DateTime? @default(now()) @db.Timestamp(0)
-  updatedAt DateTime? @default(now()) @db.Timestamp(0)
+  idUser    Int      @id @unique(map: "idUser_UNIQUE") @default(autoincrement())
+  username  String   @db.VarChar(45)
+  password  String?  @db.VarChar(255)
+  name      String   @db.VarChar(45)
+  lastName  String   @db.VarChar(45)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
 }
 
 model vehicle {
-  idVehicle         Int       @id @unique(map: "idVehicle_UNIQUE")
+  idVehicle         Int      @id @unique(map: "idVehicle_UNIQUE") @default(autoincrement())
   cliente_idcliente Int
-  brand             String?   @db.VarChar(45)
-  model             String?   @db.VarChar(45)
-  year              String?   @db.VarChar(45)
-  color             String?   @db.VarChar(45)
-  plate             String?   @db.VarChar(45)
-  doors             Int?
-  motor             String?   @db.VarChar(45)
-  createdAt         DateTime? @default(now()) @db.Timestamp(0)
-  updatedAt         DateTime? @default(now()) @db.Timestamp(0)
+  brand             String   @db.VarChar(45)
+  model             String   @db.VarChar(45)
+  year              String   @db.VarChar(45)
+  color             String?  @db.VarChar(45)
+  plate             String   @db.VarChar(45)
+  doors             Int
+  motor             String   @db.VarChar(45)
+  createdAt         DateTime @default(now()) @db.Timestamp(0)
+  updatedAt         DateTime @default(now()) @db.Timestamp(0)
 
   @@index([cliente_idcliente], map: "fk_vehicle_cliente1_idx")
 }
 
 model client {
-  idclient  Int       @id @unique(map: "idcliente_UNIQUE")
-  name      String?   @db.VarChar(45)
-  lastName  String?   @db.VarChar(45)
-  phone     String?   @db.VarChar(45)
-  invoice   Int?
-  createdAt DateTime? @default(now()) @db.Timestamp(0)
-  updatedAt DateTime? @default(now()) @db.Timestamp(0)
+  idclient      Int      @id @unique(map: "idcliente_UNIQUE") @default(autoincrement())
+  name          String   @db.VarChar(45)
+  lastName      String   @db.VarChar(45)
+  phone         String   @db.VarChar(45)
+  invoice       Boolean
+  socialReazon  String?  @db.VarChar(100)
+  zipcode       String?  @db.VarChar(10)
+  fiscalRegimen String?  @db.VarChar(45)
+  email         String?  @db.VarChar(45)
+  createdAt     DateTime @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime @default(now()) @db.Timestamp(0)
 }
 
 model priority {
-  idpriority Int     @id @unique(map: "idpriority_UNIQUE")
-  priority   String? @db.VarChar(45)
+  idpriority Int    @id @unique(map: "idpriority_UNIQUE") @default(autoincrement())
+  priority   String @db.VarChar(45)
 }
 
 model service_status {
-  idservice_status Int     @id @unique(map: "idservice_status_UNIQUE")
-  status           String? @db.VarChar(45)
+  idservice_status Int    @id @unique(map: "idservice_status_UNIQUE") @default(autoincrement())
+  status           String @db.VarChar(45)
 }
 
 model service_type {
-  idservice_type Int     @id @unique(map: "idservice_type_UNIQUE")
-  service        String? @db.VarChar(45)
-}
-
-model invoice_client_data {
-  idinvoice_client_data Int       @id @unique(map: "idinvoice_client_data_UNIQUE")
-  client_idclient       Int
-  socialReazon          String?   @db.VarChar(100)
-  zipCode               String?   @db.VarChar(10)
-  fiscalRegimen         String?   @db.VarChar(45)
-  email                 String?   @db.VarChar(45)
-  createdAt             DateTime? @default(now()) @db.Timestamp(0)
-  updatedAt             DateTime? @default(now()) @db.Timestamp(0)
-
-  @@index([client_idclient], map: "fk_invoice_client_data_client_idx")
+  idservice_type Int    @id @unique(map: "idservice_type_UNIQUE") @default(autoincrement())
+  service        String @db.VarChar(45)
 }

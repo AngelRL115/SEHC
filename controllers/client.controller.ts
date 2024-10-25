@@ -6,69 +6,61 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 
 interface Client {
-	name: string
-	lastName: string
-	phone: string
-	invoice: boolean
-	socialReazon?: string
-	zipCode?: string
-	fiscalRegimen?: string
-	email?: string
+    name: string;
+    lastName: string;
+    phone: string;
+    invoice: boolean;
+    socialReazon?: string;
+    zipcode?: string;
+    fiscalRegimen?: string;
+    email?: string;
 }
-//tengo que modificar el boolean de invoice para que acepte 1 o 0 como indicador de booleano
+
 export const newClient = async (req: Request, res: Response) => {
-	const { name, lastName, phone, invoice, socialReazon, zipCode, fiscalRegimen, email } = req.body
+    const { name, lastName, phone, invoice, socialReazon, zipcode, fiscalRegimen, email } = req.body;
 
-	let responseStatus = StatusCodes.CREATED
-	let responseContents
+    let responseStatus = StatusCodes.CREATED;
+    let responseContents;
 
-	if (!name || !lastName || !phone || (invoice !== 0 && invoice !== 1)) {
-		responseStatus = StatusCodes.BAD_REQUEST
-		responseContents = { error: 'name, lastName, phone and invoice fields are required' }
-		return res.status(responseStatus).send(responseContents)
-	}
-	const newClient: Client = {
-		name,
-		lastName,
-		phone,
-		invoice,
-		socialReazon: invoice === 1 ? socialReazon : null,
-		zipCode: invoice === 1? zipCode : null,
-		fiscalRegimen: invoice === 1 ? fiscalRegimen : null,
-		email: invoice === 1 ? email : null,
-	}
+    // Validación de campos obligatorios
+    if (!name || !lastName || !phone || invoice === undefined) {
+        responseStatus = StatusCodes.BAD_REQUEST;
+        responseContents = { error: 'name, lastName, phone and invoice (true or false) fields are required' };
+        return res.status(responseStatus).send(responseContents);
+    }
 
-	try {
-		const saveClient = await prisma.client.create({
-			data: {
-				name: newClient.name,
-				lastName: newClient.lastName,
-				phone: newClient.phone,
-				invoice: newClient.invoice,
-			},
-		})
+    const newClient: Client = {
+        name,
+        lastName,
+        phone,
+        invoice,
+        socialReazon: invoice ? socialReazon : null,
+        zipcode: invoice ? zipcode : null,
+        fiscalRegimen: invoice ? fiscalRegimen : null,
+        email: invoice ? email : null,
+    };
 
-        if(!saveClient) {
-            throw new Error('Error saving client')
-        }
+    try {
+    		await prisma.client.create({
+            	data: {
+                	name: newClient.name,
+                	lastName: newClient.lastName,
+                	phone: newClient.phone,
+                	invoice: newClient.invoice,
+					socialReazon: newClient.socialReazon,
+					zipcode: newClient.zipcode,
+					fiscalRegimen: newClient.fiscalRegimen,
+					email: newClient.email
+            	},
+        	});
 
-		await prisma.invoice_client_data.create({
-            data:{
-                client_idclient: saveClient.idclient,
-                socialReazon: newClient.socialReazon || null,
-                zipCode: newClient.zipCode || null,
-                fiscalRegimen: newClient.fiscalRegimen || null,
-                email: newClient.email || null
-            }
-        })
+        responseContents = { message: 'Client Registered successfully' };
+    } catch (error) {
+        console.error(`[POST] clientController/newClient error: ${error}`);
+        responseStatus = StatusCodes.INTERNAL_SERVER_ERROR;
+        responseContents = { error: `Internal server error: ${error}` };
+        return res.status(responseStatus).send(responseContents);
+    }
 
-		responseContents = { message: 'Client Registered successfully' }
-	} catch (error) {
-		console.error(`[POST] clientController/newClient error: ${error}`)
-		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
-		responseContents = { error: `Internal server error: ${error}` }
-		return res.status(responseStatus).send(responseContents)
-	}
-
-	 return res.status(responseStatus).send(responseContents)
-}
+    return res.status(responseStatus).send(responseContents);
+};

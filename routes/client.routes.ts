@@ -82,3 +82,5 @@ const clientRoutes = (baseRouter: Router) => {
      */
     clientRouter.post('/newClient', clientController.newClient)
 }
+
+export default clientRoutes
