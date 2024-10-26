@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import jwt from 'jsonwebtoken'
 import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
 import * as dotenv from 'dotenv'
@@ -10,14 +9,23 @@ interface Client {
 	lastName: string
 	phone: string
 	invoice: boolean
-	socialReazon?: string
+	socialReason?: string
 	zipcode?: string
 	fiscalRegimen?: string
 	email?: string
 }
 
+interface InvoiceData {
+	idClient: number
+	invoice: boolean
+	socialReason: string
+	zipcode: string
+	fiscalRegimen: string
+	email: string
+}
+
 export const newClient = async (req: Request, res: Response) => {
-	const { name, lastName, phone, invoice, socialReazon, zipcode, fiscalRegimen, email } = req.body
+	const { name, lastName, phone, invoice, socialReason, zipcode, fiscalRegimen, email } = req.body
 
 	let responseStatus = StatusCodes.CREATED
 	let responseContents
@@ -34,7 +42,7 @@ export const newClient = async (req: Request, res: Response) => {
 		lastName,
 		phone,
 		invoice,
-		socialReazon: invoice ? socialReazon : null,
+		socialReason: invoice ? socialReason : null,
 		zipcode: invoice ? zipcode : null,
 		fiscalRegimen: invoice ? fiscalRegimen : null,
 		email: invoice ? email : null,
@@ -47,7 +55,7 @@ export const newClient = async (req: Request, res: Response) => {
 				lastName: newClient.lastName,
 				phone: newClient.phone,
 				invoice: newClient.invoice,
-				socialReazon: newClient.socialReazon,
+				socialReazon: newClient.socialReason,
 				zipcode: newClient.zipcode,
 				fiscalRegimen: newClient.fiscalRegimen,
 				email: newClient.email,
@@ -65,7 +73,45 @@ export const newClient = async (req: Request, res: Response) => {
 	return res.status(responseStatus).send(responseContents)
 }
 
-export const updateClientInvoiceDetails = async (req: Request, res: Response) => {}
+export const updateClientInvoiceDetails = async (req: Request, res: Response) => {
+	const { idClient, invoice, socialReason, zipcode, fiscalRegimen, email } = req.body
+
+	let responseStatus = StatusCodes.OK
+	let responseContents
+
+	const invoiceDetails: InvoiceData = {
+		idClient,
+		invoice,
+		socialReason,
+		zipcode,
+		fiscalRegimen,
+		email,
+	}
+
+	try {
+		await prisma.client.update({
+			where: { idclient: invoiceDetails.idClient },
+			data: {
+				invoice: invoiceDetails.invoice,
+				socialReazon: invoiceDetails.socialReason,
+				zipcode: invoiceDetails.zipcode,
+				fiscalRegimen: invoiceDetails.fiscalRegimen,
+				email: invoiceDetails.email,
+			},
+		})
+
+		responseContents = { message: 'Data updated, now client has details for invoices' }
+
+	} catch (error) {
+		console.error(`[UPDATE] clientController/updateClientInvoiceDetails error: ${error}`)
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+		responseContents = { error: `Internal server error: ${error}` }
+		return res.status(responseStatus).send(responseContents)
+	}
+
+	return res.status(responseStatus).send(responseContents)
+}
+
 export const updateClientDetails = async (req: Request, res: Response) => {}
 export const getClientDetails = async (req: Request, res: Response) => {}
 export const getAllClients = async (req: Request, res: Response) => {}
