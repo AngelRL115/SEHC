@@ -24,6 +24,13 @@ interface InvoiceData {
 	email: string
 }
 
+interface ClientPersonalData {
+	idClient: number
+	name: string
+	lastName: string
+	phone: string
+}
+
 export const newClient = async (req: Request, res: Response) => {
 	const { name, lastName, phone, invoice, socialReason, zipcode, fiscalRegimen, email } = req.body
 
@@ -66,7 +73,7 @@ export const newClient = async (req: Request, res: Response) => {
 	} catch (error) {
 		console.error(`[POST] clientController/newClient error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
-		responseContents = { error: `Internal server error: ${error}` }
+		responseContents = { error: `[POST] clientController/newClient. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
 	}
 
@@ -89,7 +96,7 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 	}
 
 	try {
-		await prisma.client.update({
+		const updatedInvoiceData = await prisma.client.update({
 			where: { idclient: invoiceDetails.idClient },
 			data: {
 				invoice: invoiceDetails.invoice,
@@ -99,19 +106,108 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 				email: invoiceDetails.email,
 			},
 		})
+		if (!updatedInvoiceData) {
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `No client found with ID: ${idClient}. Update cannot be performed` }
+			return res.status(responseStatus).send(responseContents)
+		}
 
 		responseContents = { message: 'Data updated, now client has details for invoices' }
-
 	} catch (error) {
-		console.error(`[UPDATE] clientController/updateClientInvoiceDetails error: ${error}`)
+		console.error(`[PUT] clientController/updateClientInvoiceDetails error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
-		responseContents = { error: `Internal server error: ${error}` }
+		responseContents = { error: `[PUT] clientController/updateClientInvoiceDetails. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
 	}
 
 	return res.status(responseStatus).send(responseContents)
 }
 
-export const updateClientDetails = async (req: Request, res: Response) => {}
-export const getClientDetails = async (req: Request, res: Response) => {}
-export const getAllClients = async (req: Request, res: Response) => {}
+export const updateClientDetails = async (req: Request, res: Response) => {
+	const { idClient, name, lastName, phone } = req.body
+	let responseStatus = StatusCodes.OK
+	let responseContents
+
+	const personalData: ClientPersonalData = {
+		idClient,
+		name,
+		lastName,
+		phone,
+	}
+
+	try {
+		const updatedDetails = await prisma.client.update({
+			where: { idclient: personalData.idClient },
+			data: {
+				name: personalData.name,
+				lastName: personalData.lastName,
+				phone: personalData.phone,
+			},
+		})
+		if (!updatedDetails) {
+			responseStatus = StatusCodes.CONFLICT
+			responseContents = { error: `Update cannot be performed see log details ${updatedDetails}` }
+			return res.status(responseStatus).send(responseContents)
+		}
+
+		responseContents = { message: 'Basic personal information updated' }
+	} catch (error) {
+		console.error(`[PUT] clientController/updateClientDetails error: ${error}`)
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+		responseContents = { error: `[PUT] clientController/updateClientDetails. Internal server error: ${error}` }
+		return res.status(responseStatus).send(responseContents)
+	}
+
+	return res.status(responseStatus).send(responseContents)
+}
+
+export const getClientDetails = async (req: Request, res: Response) => {
+	const { idClient } = req.body
+	let responseStatus = StatusCodes.OK
+	let responseContents
+
+	try {
+		const clientData = await prisma.client.findUnique({
+			where: { idclient: idClient },
+		})
+
+		if (!clientData) {
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `No client found with ID: ${idClient}` }
+			return res.status(responseStatus).send(responseContents)
+		}
+
+		responseContents = clientData
+	} catch (error) {
+		console.error(`[GET] clientController/getClientDetails error: ${error}`)
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+		responseContents = { error: `[GET] clientController/getClientDetails. Internal server error: ${error}` }
+		return res.status(responseStatus).send(responseContents)
+	}
+
+	return res.status(responseStatus).send(responseContents)
+}
+
+export const getAllClients = async (req: Request, res: Response) => {
+	let responseStatus = StatusCodes.OK
+	let responseContents
+
+	try {
+		const allClients = await prisma.client.findMany()
+
+		if (!allClients) {
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `No clients found, check error logs: ${allClients}` }
+			return res.status(responseStatus).send(responseContents)
+		}
+
+		responseContents = allClients
+	} catch (error) {
+		console.error(`[GET] clientController/getAllClients error: ${error}`)
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+		responseContents = { error: `[GET] clientController/getAllClients. Internal server error: ${error}` }
+		return res.status(responseStatus).send(responseContents)
+	}
+
+	return res.status(responseStatus).send(responseContents)
+}
