@@ -35,6 +35,22 @@ const swaggerOptions = {
 				url: 'http://localhost:3000/SEHC', //cuando el server este en la nube cambiar esto por la url del servicio
 			},
 		],
+		components: {
+			securitySchemes: {
+				Bearer: {
+					type: 'http',
+					scheme: 'bearer',
+					bearerFormat: 'JWT',
+					description: 'Ingresa el token generado en el metodo login'
+				},
+			}
+			
+		},
+		security: [
+			{
+				Bearer: []
+			},
+		],
 	},
 	apis: ['./routes/*.ts'], // Indica la ubicación de tus rutas para generar la documentación
 }

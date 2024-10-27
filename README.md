@@ -25,8 +25,16 @@ despues ejecuta el siguiente comando para generar el cliente que nos permitira i
 ```bash
   npx prisma generate
 ```
-
 **Nota:** Si realizas alguna modificacion a la base datos, es necesario eliminar la carpeta node_modules y volver a ejecutar los comando de prisma, ya que hace un modelado temporal y el cliente necesita actualizarse con el nueco modelado temporal.
+
+## Actualizacion sobre las actualizaciones de la base de datos con el schema de prisma ORM
+En lugar de utilizar los 2 comando mencionados arriba, solo utiliza el comando (solo funciona en windows)
+
+```bash
+  npm run clean
+```
+
+Este comando hara una limpieza completa del proyecto y ademas hara todo lo necesario para actualizar el schema de prisma y volver a generar el cliente de prisma necesario para poder interactual con la base de datos.
 
 ## Documentacion para utilizar los endpoints
 
