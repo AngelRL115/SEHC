@@ -112,6 +112,18 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 			return res.status(responseStatus).send(responseContents)
 		}
 
+		if (
+			updatedInvoiceData.invoice !== invoice ||
+			updatedInvoiceData.socialReazon !== socialReason ||
+			updatedInvoiceData.zipcode !== zipcode ||
+			updatedInvoiceData.fiscalRegimen !== fiscalRegimen ||
+			updatedInvoiceData.email !== email
+		) {
+			responseStatus = StatusCodes.CONFLICT
+			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
+			return res.status(responseStatus).send(responseContents)
+		}
+
 		responseContents = { message: 'Data updated, now client has details for invoices' }
 	} catch (error) {
 		console.error(`[PUT] clientController/updateClientInvoiceDetails error: ${error}`)
@@ -147,6 +159,12 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 		if (!updatedDetails) {
 			responseStatus = StatusCodes.CONFLICT
 			responseContents = { error: `Update cannot be performed see log details ${updatedDetails}` }
+			return res.status(responseStatus).send(responseContents)
+		}
+
+		if (updatedDetails.name !== name || updatedDetails.lastName !== lastName || updatedDetails.phone !== phone) {
+			responseStatus = StatusCodes.CONFLICT
+			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
 			return res.status(responseStatus).send(responseContents)
 		}
 
