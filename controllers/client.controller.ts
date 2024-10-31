@@ -119,7 +119,7 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 			updatedInvoiceData.fiscalRegimen !== fiscalRegimen ||
 			updatedInvoiceData.email !== email
 		) {
-			responseStatus = StatusCodes.CONFLICT
+			responseStatus = StatusCodes.NOT_ACCEPTABLE
 			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
 			return res.status(responseStatus).send(responseContents)
 		}
@@ -163,7 +163,7 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 		}
 
 		if (updatedDetails.name !== name || updatedDetails.lastName !== lastName || updatedDetails.phone !== phone) {
-			responseStatus = StatusCodes.CONFLICT
+			responseStatus = StatusCodes.NOT_ACCEPTABLE
 			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
 			return res.status(responseStatus).send(responseContents)
 		}
