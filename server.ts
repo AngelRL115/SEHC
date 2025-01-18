@@ -4,14 +4,16 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
-const swaggerUi = require('swagger-ui-express')
-const swaggerJsdoc = require('swagger-jsdoc')
+import swaggerUi from 'swagger-ui-express'
+import swaggerJsdoc from 'swagger-jsdoc'
+import log, {morganStream} from './logger/logger'
 import * as dotenv from 'dotenv'
+
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
-const logger = morgan('combined')
+const logger = morgan('combined', {stream: morganStream})
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
