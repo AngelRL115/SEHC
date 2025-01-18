@@ -71,5 +71,5 @@ app.get('/', (_req, res) => {
 })
 
 app.listen(PORT, () => {
-	console.log(`Server Running on port ${PORT}`)
+	log.info(`Server running on port ${PORT}`)
 })
