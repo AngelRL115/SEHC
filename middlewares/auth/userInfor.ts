@@ -11,7 +11,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 	const token = authHeader.split(' ')[1]
 
 	try {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { iduser: number; email: string; username: string }
+		const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { iduser: number; username: string; name: string }
 		req.user = decoded // Almacenar datos en req.user
 		next()
 	} catch (error) {
