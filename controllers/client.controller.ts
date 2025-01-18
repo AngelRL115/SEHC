@@ -66,6 +66,8 @@ export const newClient = async (req: Request, res: Response) => {
 				zipcode: newClient.zipcode,
 				fiscalRegimen: newClient.fiscalRegimen,
 				email: newClient.email,
+				createdAt: new Date(),
+				updatedAt: new Date()
 			},
 		})
 
@@ -104,6 +106,7 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 				zipcode: invoiceDetails.zipcode,
 				fiscalRegimen: invoiceDetails.fiscalRegimen,
 				email: invoiceDetails.email,
+				updatedAt: new Date()
 			},
 		})
 		if (!updatedInvoiceData) {
@@ -154,6 +157,7 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 				name: personalData.name,
 				lastName: personalData.lastName,
 				phone: personalData.phone,
+				updatedAt: new Date()
 			},
 		})
 		if (!updatedDetails) {
