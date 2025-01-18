@@ -1,11 +1,10 @@
 import { Router } from 'express'
 import * as clientController from '../controllers/client.controller'
-import authenticate from '../middlewares/auth/authenticate'
+
 
 const clientRouter = Router()
 const clientRoutes = (baseRouter: Router) => {
 	baseRouter.use('/client', clientRouter)
-	clientRouter.use('', authenticate)
 
 	/**
 	 * @swagger

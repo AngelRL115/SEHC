@@ -4,123 +4,59 @@ import jwt from 'jsonwebtoken'
 import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
 import * as dotenv from 'dotenv'
+import logger from '../logger/logger'
 dotenv.config()
 
-// export const registerUserPassword = async (req: Request, res: Response) => {
-//     const {username, password, name, lastName} = req.body
-//     let responseStatus = StatusCodes.OK
-//     let responseContents
-
-//     try {
-//         if(!username || !password || !name || !lastName ){
-//             responseStatus = StatusCodes.BAD_REQUEST
-//             responseContents = { error: 'All fields are required'}
-//             return res.status(responseStatus).send(responseContents)
-//         }
-//         const existingUsername = await prisma.user.findFirst({where:{username:username}})
-
-//         if(existingUsername){
-//             responseStatus = StatusCodes.BAD_REQUEST
-//             responseContents = {error: 'Username already taken'}
-//             return res.status(responseStatus).send(responseContents)
-//         }
-//         const hashedPassword = await bcrypt.hash(password, 10)
-//         const newUser = await prisma.user.create({
-//             data:{
-//                 username: username,
-//                 password: hashedPassword,
-//                 name: name,
-//                 lastName: lastName,
-                
-//         }})
-//         responseContents = {message: `User with username ${newUser.username} created`}
-
-//     } catch (error) {
-//         console.error(`[POST] authController/registerUser error: ${error}`)
-//         responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
-//         responseContents = {error: error}
-//         return res.status(responseStatus).send(responseContents)
-//     }
-//     res.status(responseStatus).send(responseContents)
-// }
-
-// export const loginPassword = async (req: Request, res: Response) => {
-//     const {username, password} = req.body
-//     let responseStatus = StatusCodes.OK
-//     let responseContents
-//     try {
-//         if(!username || !password){
-//             responseStatus = StatusCodes.BAD_REQUEST
-//             responseContents = {error:'Username or password not provided'}
-//             return res.status(responseStatus).send(responseContents)
-//         }
-
-//         const validUsername = await prisma.user.findFirst({where: {username: username}})
-//         if(!validUsername){
-//             responseStatus = StatusCodes.BAD_REQUEST
-//             responseContents = {error:'Username not exist'}
-//             return res.status(responseStatus).send(responseContents)
-//         }
-//         const validPassword = await bcrypt.compare(password, validUsername.password)
-//         if(!validPassword){
-//             responseStatus = StatusCodes.BAD_REQUEST
-//             responseContents = {error:'Invalid password'}
-//             return res.status(responseStatus).send(responseContents)
-//         }
-
-//         const token = jwt.sign({userid: validUsername.idUser}, process.env.JWT_SECRET as string, {expiresIn: '10h'})
-//         responseContents = {token}
-        
-//     } catch (error) {
-//         console.error(`[POST] authController/loging error: ${error}`)
-// 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
-// 		responseContents = { error: error }
-// 		return res.status(responseStatus).send(responseContents)
-//     }
-//     res.status(responseStatus).send(responseContents)
-// }
-
 // Función de registro de usuarios sin contraseña
+interface User {
+    username: string
+    name: string
+    lastName: string
+}
 
 export const registerUser = async (req: Request, res: Response) => {
     const { username, name, lastName } = req.body
-    let responseStatus = StatusCodes.CREATED
-    let responseContents
+    let responseContents = {}
 
     try {
         // Validar que los campos requeridos estén presentes
         if (!username || !name || !lastName) {
-            responseStatus = StatusCodes.BAD_REQUEST
             responseContents = { error: 'All fields are required' }
-            return res.status(responseStatus).send(responseContents)
+            logger.warn(`[POST] auth.controller/registerUser. Missing required fields: ${JSON.stringify(req.body)}.`)
+            return res.status(StatusCodes.BAD_REQUEST).send(responseContents)
         }
 
         // Verificar si el nombre de usuario ya existe
         const existingUsername = await prisma.user.findFirst({ where: { username: username } })
 
         if (existingUsername) {
-            responseStatus = StatusCodes.CONFLICT
             responseContents = { error: 'Username already taken' }
-            return res.status(responseStatus).send(responseContents)
+            logger.info(`[POST] auth.controller/registerUser. Username already taken: ${username}.`)
+            return res.status(StatusCodes.CONFLICT).send(responseContents)
+        }
+
+        const user: User = {
+            username,
+            name,
+            lastName
         }
 
         // Crear el usuario sin contraseña
         const newUser = await prisma.user.create({
             data: {
-                username: username,
-                name: name,
-                lastName: lastName,
+                username: user.username,
+                name: user.name,
+                lastName: user.lastName,
             }
         })
         responseContents = { message: `User with username ${newUser.username} created` }
-
+        logger.info(`[POST] auth.controller/registerUser. User created: ${newUser.idUser}, username: ${newUser.username}.`)
     } catch (error) {
-        console.error(`[POST] authController/registerUser error: ${error}`)
-        responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+        logger.error(`[POST] authController/registerUser error: ${error}`)
         responseContents = { error: error }
-        return res.status(responseStatus).send(responseContents)
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(responseContents)
     }
-   return res.status(responseStatus).send(responseContents)
+   return res.status(StatusCodes.CREATED).send(responseContents)
 }
 
 // Función de login sin contraseña
