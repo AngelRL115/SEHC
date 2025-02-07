@@ -212,3 +212,4 @@ INSERT INTO `sehc`.`service_status` (`idservice_status`, `status`) VALUES ('5', 
 INSERT INTO `sehc`.`service_type` (`idservice_type`, `service`) VALUES ('1', 'Chequeo general');
 INSERT INTO `sehc`.`service_type` (`idservice_type`, `service`) VALUES ('2', 'Reparacion');
 INSERT INTO `sehc`.`service_type` (`idservice_type`, `service`) VALUES ('3', 'Garantia');
+INSERT INTO `sehc`.`service_type` (`idservice_type`, `service`) VALUES ('4', 'Servicio de kilometraje');
