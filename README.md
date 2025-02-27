@@ -42,4 +42,6 @@ Para poder visualizar la documentacion de los endpoints necesitas acceder desde 
 
 ## Utilizacion de Balsamiq
 
-Balsmiq es una app bien sencilla que me gusta utilizar para desarrollar bosquejos de que es lo que quiero crear, te dejo el zip con el programa y con las instrucciones dentro de ese zip de como crackearlo en la carpeta de utils, me gustaria que le heches un vistazo para tener una idea de como pienso desarrollar el backend para que funcione con el frontendm al momento de subir este commit se que debo modificar muchas cosas sobre como recibir los datos, los datos que te tengo que regresar y tambien los endpoints existentes, te mantendre al tanto cuando ya todo este mas acorde a la version mas fiel de los bosquejos.
+Balsmiq es una app bien sencilla que me gusta utilizar para desarrollar bosquejos de que es lo que quiero crear, te dejo el zip con el programa y con las instrucciones dentro de ese zip de como crackearlo en la carpeta de utils, me gustaria que le heches un vistazo para tener una idea de como pienso desarrollar el backend para que funcione con el frontent al momento de subir este commit se que debo modificar muchas cosas sobre como reescribir los datos, los datos que te tengo que regresar y tambien los endpoints existentes, te mantendre al tanto cuando ya todo este mas acorde a la version mas fiel de los bosquejos.
+
+en balsamiq abre el archivo .bmpr aqui viene el bosquejo de lo que te menciono, igual cualquier ajuste con toda confianza dimelo y lo resolvemos
