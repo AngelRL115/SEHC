@@ -2,18 +2,10 @@ import { Request, response, Response } from 'express'
 import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
 import * as dotenv from 'dotenv'
+import { Vehicle } from '../interfaces/Vehicle'
 dotenv.config()
 
-interface Vehicle {
-	cliente_idcliente: number
-	brand: string
-	model: string
-	year: string
-	color: string
-	plate: string
-	doors: number
-	motor: string
-}
+
 
 export const newVehicle = async (req: Request, res: Response) => {
 	const { idClient, brand, model, year, color, plate, doors, motor } = req.body

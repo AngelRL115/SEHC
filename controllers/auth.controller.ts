@@ -5,14 +5,11 @@ import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
 import * as dotenv from 'dotenv'
 import logger from '../logger/logger'
+import { User } from '../interfaces/User'
 dotenv.config()
 
 // Función de registro de usuarios sin contraseña
-interface User {
-	username: string
-	name: string
-	lastName: string
-}
+
 
 export const registerUser = async (req: Request, res: Response) => {
 	const { username, name, lastName } = req.body

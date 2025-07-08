@@ -2,34 +2,10 @@ import { Request, Response } from 'express'
 import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
 import * as dotenv from 'dotenv'
+import { Client } from '../interfaces/Client'
+import { ClientPersonalData } from '../interfaces/ClientPersonalData'
+import { InvoiceData } from '../interfaces/InvoiceData'
 dotenv.config()
-
-interface Client {
-	name: string
-	lastName: string
-	phone: string
-	invoice: boolean
-	socialReason?: string
-	zipcode?: string
-	fiscalRegimen?: string
-	email?: string
-}
-
-interface InvoiceData {
-	idClient: number
-	invoice: boolean
-	socialReason: string
-	zipcode: string
-	fiscalRegimen: string
-	email: string
-}
-
-interface ClientPersonalData {
-	idClient: number
-	name: string
-	lastName: string
-	phone: string
-}
 
 export const newClient = async (req: Request, res: Response) => {
 	const { name, lastName, phone, invoice, socialReason, zipcode, fiscalRegimen, email } = req.body
