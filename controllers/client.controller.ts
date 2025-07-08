@@ -5,6 +5,8 @@ import * as dotenv from 'dotenv'
 import { Client } from '../interfaces/Client'
 import { ClientPersonalData } from '../interfaces/ClientPersonalData'
 import { InvoiceData } from '../interfaces/InvoiceData'
+import logger from '../logger/logger'
+import { log } from 'console'
 dotenv.config()
 
 export const newClient = async (req: Request, res: Response) => {
@@ -16,7 +18,8 @@ export const newClient = async (req: Request, res: Response) => {
 	// Validación de campos obligatorios
 	if (!name || !lastName || !phone || invoice === undefined) {
 		responseStatus = StatusCodes.BAD_REQUEST
-		responseContents = { error: 'name, lastName, phone and invoice (true or false) fields are required' }
+		responseContents = { error: 'name, lastName, phone and invoice (true or false) fields are required.' }
+		logger.warn(`[POST] client.controller/newClient. Missing required fields.`)
 		return res.status(responseStatus).send(responseContents)
 	}
 
@@ -48,8 +51,9 @@ export const newClient = async (req: Request, res: Response) => {
 		})
 
 		responseContents = { message: 'Client Registered successfully' }
+		logger.info(`[POST] client.controller/newClient. Client Registered successfully with name: ${newClient.name} ${newClient.lastName}`)
 	} catch (error) {
-		console.error(`[POST] clientController/newClient error: ${error}`)
+		logger.error(`[POST] clientController/newClient error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
 		responseContents = { error: `[POST] clientController/newClient. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
@@ -88,6 +92,7 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 		if (!updatedInvoiceData) {
 			responseStatus = StatusCodes.NOT_FOUND
 			responseContents = { error: `No client found with ID: ${idClient}. Update cannot be performed` }
+			logger.warn(`[PUT] client.controller/updateClientInvoiceDetails. No client found with ID: ${idClient}. Update cannot be performed`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
@@ -100,12 +105,14 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 		) {
 			responseStatus = StatusCodes.NOT_ACCEPTABLE
 			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
+			logger.warn(`[PUT] client.controller/updateClientInvoiceDetails. Update failed. Data was not correctly updated for client with ID: ${idClient}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
 		responseContents = { message: 'Data updated, now client has details for invoices' }
+		logger.info(`[PUT] client.controller/updateClientInvoiceDetails. Cata updated, now client has details for invoices`)
 	} catch (error) {
-		console.error(`[PUT] clientController/updateClientInvoiceDetails error: ${error}`)
+		logger.error(`[PUT] clientController/updateClientInvoiceDetails error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
 		responseContents = { error: `[PUT] clientController/updateClientInvoiceDetails. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
@@ -139,18 +146,21 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 		if (!updatedDetails) {
 			responseStatus = StatusCodes.CONFLICT
 			responseContents = { error: `Update cannot be performed see log details ${updatedDetails}` }
+			logger.warn(`[PUT] client.controller/updateClientDetails. Update cannot be performed see log details ${updatedDetails}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
 		if (updatedDetails.name !== name || updatedDetails.lastName !== lastName || updatedDetails.phone !== phone) {
 			responseStatus = StatusCodes.NOT_ACCEPTABLE
 			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
+			logger.warn(`[PUT] client.controller/updateClientDetails. Update failed. Data was not correctly updated for client with ID: ${idClient}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
 		responseContents = { message: 'Basic personal information updated' }
+		logger.info(`[PUT] client.controller/updateClientDetails. Basic personal information updated for client with ID: ${idClient}`)
 	} catch (error) {
-		console.error(`[PUT] clientController/updateClientDetails error: ${error}`)
+		logger.error(`[PUT] clientController/updateClientDetails error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
 		responseContents = { error: `[PUT] clientController/updateClientDetails. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
@@ -172,12 +182,13 @@ export const getClientDetails = async (req: Request, res: Response) => {
 		if (!clientData) {
 			responseStatus = StatusCodes.NOT_FOUND
 			responseContents = { error: `No client found with ID: ${idClient}` }
+			logger.warn(`[GET] client.controller/getClientDetails. No client found with ID: ${idClient}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
 		responseContents = clientData
 	} catch (error) {
-		console.error(`[GET] clientController/getClientDetails error: ${error}`)
+		logger.error(`[GET] clientController/getClientDetails error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
 		responseContents = { error: `[GET] clientController/getClientDetails. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
@@ -196,12 +207,13 @@ export const getAllClients = async (req: Request, res: Response) => {
 		if (!allClients) {
 			responseStatus = StatusCodes.NOT_FOUND
 			responseContents = { error: `No clients found, check error logs: ${allClients}` }
+			logger.warn(`[GET] client.controller/getAllClients. No clients found check error logs: ${allClients}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
 		responseContents = allClients
 	} catch (error) {
-		console.error(`[GET] clientController/getAllClients error: ${error}`)
+		logger.error(`[GET] clientController/getAllClients error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
 		responseContents = { error: `[GET] clientController/getAllClients. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
