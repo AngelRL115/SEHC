@@ -8,6 +8,55 @@ dotenv.config()
 
 
 
+/**
+ * Registers a new vehicle in the database based on the request body fields.
+ *
+ * @function newVehicle
+ * @async
+ *
+ * @param {Request} req - Express request object. The body debe incluir:
+ * 
+ * - `idClient` (number) - ID del cliente al que pertenece el vehículo (requerido)
+ * - `brand` (string) - Marca del vehículo (requerido)
+ * - `model` (string) - Modelo del vehículo (requerido)
+ * - `year` (number) - Año del vehículo (requerido)
+ * - `color` (string) - Color del vehículo (requerido)
+ * - `plate` (string) - Matrícula del vehículo (requerido)
+ * - `doors` (number) - Número de puertas (requerido)
+ * - `motor` (string) - Tipo o descripción del motor (requerido)
+ *
+ * @param {Response} res - Express response object. Usado para devolver una respuesta al cliente basada en el resultado de la operación.
+ *
+ * @returns {Promise<Response>} - Retorna una de las siguientes respuestas HTTP:
+ * 
+ * - `201 Created`: Vehículo creado exitosamente.
+ * - `400 Bad Request`: Faltan campos requeridos en el cuerpo del request.
+ * - `409 Conflict`: No se pudo guardar el vehículo.
+ * - `500 Internal Server Error`: Error inesperado durante la operación.
+ *
+ * @example
+ *  Request body:
+ * {
+ *   "idClient": 5,
+ *   "brand": "Toyota",
+ *   "model": "Corolla",
+ *   "year": 2021,
+ *   "color": "Blanco",
+ *   "plate": "ABC123",
+ *   "doors": 4,
+ *   "motor": "1.8L"
+ * }
+ *
+ *  Success response:
+ * {
+ *   "message": "New vehicle registered"
+ * }
+ *
+ *  Error response (missing fields):
+ * {
+ *   "error": "all fields are required, please check them out on payload object or consult the swagger documentation"
+ * }
+ */
 export const newVehicle = async (req: Request, res: Response) => {
 	const { idClient, brand, model, year, color, plate, doors, motor } = req.body
 	let responseStatus = StatusCodes.CREATED
@@ -71,6 +120,45 @@ export const newVehicle = async (req: Request, res: Response) => {
 	return res.status(responseStatus).send(responseContents)
 }
 
+/**
+ * Retrieves a single vehicle from the database using its unique identifier (`idVehicle`).
+ *
+ * @function getVehicle
+ * @async
+ *
+ * @param {Request} req - Express request object. Se espera que el campo `idVehicle` esté presente en el cuerpo (`req.body`) del request.
+ * 
+ * @param {Response} res - Express response object. Utilizado para retornar la respuesta HTTP con los detalles del vehículo o un mensaje de error.
+ *
+ * @returns {Promise<Response>} - Devuelve una respuesta HTTP basada en el resultado de la consulta:
+ *
+ * - `200 OK`: Retorna los detalles del vehículo.
+ * - `400 Bad Request`: Si el campo `idVehicle` no fue proporcionado.
+ * - `404 Not Found`: Si no se encuentra ningún vehículo con el `idVehicle` proporcionado.
+ * - `500 Internal Server Error`: Si ocurre un error inesperado durante la operación.
+ *
+ * @example
+ *  Request body:
+ * {
+ *   "idVehicle": 42
+ * }
+ *
+ *  Success response:
+ * {
+ *   "idVehicle": 42,
+ *   "brand": "Mazda",
+ *   "model": "CX-5",
+ *   "year": 2022,
+ *   "color": "Rojo",
+ *   "plate": "ABC123",
+ *   ...
+ * }
+ *
+ *  Error response (missing id):
+ * {
+ *   "error": "idVehicle field required"
+ * }
+ */
 export const getVehicle = async (req: Request, res: Response) => {
 	const { idVehicle } = req.body
 	let responseStatus = StatusCodes.OK
@@ -103,6 +191,48 @@ export const getVehicle = async (req: Request, res: Response) => {
 
 	return res.status(responseStatus).send(responseContents)
 }
+
+/**
+ * Retrieves all vehicles associated with a specific client from the database.
+ *
+ * @function getAllVehiclesFromclient
+ * @async
+ *
+ * @param {Request} req - Express request object. Se espera que el campo `idClient` esté presente en `req.body`
+ * para identificar al cliente cuyos vehículos se quieren recuperar.
+ *
+ * @param {Response} res - Express response object. Usado para devolver la lista de vehículos, o un mensaje
+ * de error si la operación falla.
+ *
+ * @returns {Promise<Response>} - Devuelve una respuesta HTTP con base en el resultado de la operación:
+ *
+ * - `200 OK`: Retorna un arreglo con los vehículos del cliente.
+ * - `400 Bad Request`: Si el campo `idClient` no fue proporcionado.
+ * - `404 Not Found`: Si no se encontraron vehículos para el cliente dado.
+ * - `500 Internal Server Error`: Si ocurrió un error durante la consulta a la base de datos.
+ *
+ * @example
+ *  Request body:
+ * {
+ *   "idClient": 7
+ * }
+ *
+ *  Success response:
+ * [
+ *   {
+ *     "idVehicle": 1,
+ *     "brand": "Toyota",
+ *     "model": "Corolla",
+ *     ...
+ *   },
+ *   ...
+ * ]
+ *
+ *  Error response:
+ * {
+ *   "error": "idClient field required"
+ * }
+ */
 export const getAllVehiclesFromclient = async (req: Request, res: Response) => {
 	const { idClient } = req.body
 	let responseStatus = StatusCodes.OK
