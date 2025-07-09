@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-//import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import prisma from '../prisma/prisma'
 import { StatusCodes } from 'http-status-codes'
@@ -8,9 +7,36 @@ import logger from '../logger/logger'
 import { User } from '../interfaces/User'
 dotenv.config()
 
-// Función de registro de usuarios sin contraseña
-
-
+/**
+ * Registers a new user if the provided `username`, `name`, and `lastName` are valid
+ * and the username is not already taken.
+ *
+ * @function registerUser
+ * @async
+ * 
+ * @param {Request} req - Express request object, expected to contain `username`, `name`, and `lastName` in the body.
+ * @param {Response} res - Express response object used to send back appropriate HTTP status codes and messages.
+ * 
+ * @returns {Promise<Response>} - Returns a response with one of the following status codes:
+ * 
+ * - `201 Created`: User was successfully registered.
+ * - `400 Bad Request`: One or more required fields are missing.
+ * - `409 Conflict`: Username is already taken.
+ * - `500 Internal Server Error`: An unexpected error occurred.
+ * 
+ * @example
+ *  Request body:
+ * {
+ *   "username": "angel123",
+ *   "name": "Ángel",
+ *   "lastName": "Rodríguez"
+ * }
+ * 
+ *  Successful response:
+ * {
+ *   "message": "User with username angel123 created"
+ * }
+ */
 export const registerUser = async (req: Request, res: Response) => {
 	const { username, name, lastName } = req.body
 	let responseContents = {}
@@ -56,7 +82,40 @@ export const registerUser = async (req: Request, res: Response) => {
 	return res.status(StatusCodes.CREATED).send(responseContents)
 }
 
-// Función de login sin contraseña
+
+/**
+ * Authenticates a user based on the provided `username`, and returns a JWT token
+ * if the login is successful. This implementation does not include password validation.
+ *
+ * @function login
+ * @async
+ * 
+ * @param {Request} req - Express request object, expected to contain the `username` field in the body.
+ * @param {Response} res - Express response object used to return appropriate HTTP responses.
+ * 
+ * @returns {Promise<Response>} - Sends one of the following HTTP responses:
+ * 
+ * - `200 OK`: Login successful. Returns a JWT token in the response body.
+ * - `400 Bad Request`: The username was not provided.
+ * - `401 Unauthorized`: The username does not exist in the database.
+ * - `500 Internal Server Error`: An unexpected server error occurred.
+ * 
+ * @example
+ *  Request body:
+ * {
+ *   "username": "angel123"
+ * }
+ * 
+ *  Successful response:
+ * {
+ *   "token": "<jwt-token>"
+ * }
+ * 
+ *  Error response (missing username):
+ * {
+ *   "error": "Username not provided"
+ * }
+ */
 export const login = async (req: Request, res: Response) => {
 	const { username } = req.body
 	let responseContents = {}
