@@ -256,6 +256,7 @@ export const getAllVehiclesFromclient = async (req: Request, res: Response) => {
 		}
 
 		responseContents = vehicles
+		logger.info(`[GET] vehicle.controller/getAllVehiclesFromClient. Vehicles for client id ${idClient} retrieved successfully.`)
 	} catch (error) {
 		logger.error(`[GET] vehicle.controller/getAllVehiclesFromClient Internal server error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
@@ -265,25 +266,107 @@ export const getAllVehiclesFromclient = async (req: Request, res: Response) => {
 
 	return res.status(responseStatus).send(responseContents)
 }
-//SE NECESITA TERMINAR ESTE CONTROLLER Y ADEMAS LOS METODOS DE UPDATEVEHICLE Y DELETEVEHICLE
+
+/**
+ * Updates an existing vehicle record in the database based on the provided fields.
+ * Only the fields present in the request body will be updated; others will retain their current values.
+ *
+ * @param {Request} req - Express request object containing the vehicle fields to update.
+ *   Expected fields in the body:
+ *     - `idVehicle` (required): The unique identifier of the vehicle to update.
+ *     - Optional fields: `brand`, `model`, `year`, `color`, `plate`, `doors`, `motor`.
+ *
+ * @param {Response} res - Express response object used to return status and result of the operation.
+ *
+ * @returns {Response} Returns a JSON response with a success message and the updated vehicle data,
+ * or an error message with appropriate HTTP status codes:
+ *   - 200 OK: Vehicle updated successfully.
+ *   - 400 Bad Request: If `idVehicle` is missing.
+ *   - 404 Not Found: If no vehicle exists with the provided `idVehicle`.
+ *   - 500 Internal Server Error: If a server/database error occurs.
+ *
+ * @example
+ *  PUT /vehicle/update
+ * {
+ *   "idVehicle": "abc123",
+ *   "color": "Red"
+ * }
+ *  Response:
+ * {
+ *   "message": "Vehicle updated successfully",
+ *   "vehicle": {
+ *     ... // updated vehicle data
+ *   }
+ * }
+ */
 export const updateVehicle = async (req: Request, res: Response) => {
-	const { idVehicle } = req.body
+	const { idVehicle, brand, model, year, color, plate, doors,motor } = req.body
     let responseStatus = StatusCodes.OK
     let responseContents
 
     try {
+
         if(!idVehicle){
             responseStatus = StatusCodes.BAD_REQUEST
 			responseContents = { error: 'idVehicle field required' }
 			logger.warn(`[PUT] vehicle.controller/updateVehicle. Missing idVehicle field.`)
 			return res.status(responseStatus).send(responseContents)
         }
-       
+		const vehicle = await prisma.vehicle.findUnique({ where: { idVehicle: idVehicle } })
+
+		if (!vehicle) {
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `No vehicle found with id: ${idVehicle}` }
+			logger.warn(`[PUT] vehicle.controller/updateVehicle. No vehicle found with id: ${idVehicle}`)
+			return res.status(responseStatus).send(responseContents)
+		}
+
+		const vehicleDetails: Vehicle = {
+			cliente_idcliente: vehicle.cliente_idcliente,
+			brand: brand ? brand : vehicle.brand,
+			model: model ? model : vehicle.model,
+			year : year ? year : vehicle.year,
+			color: color ? color : vehicle.color,
+			plate: plate ? plate : vehicle.plate,
+			doors: doors ? doors : vehicle.doors,
+			motor: motor ? motor : vehicle.motor,
+		}
+
+		const updatedVehicle = await prisma.vehicle.update({
+			where: { idVehicle: idVehicle },
+			data: {
+				brand: vehicleDetails.brand,
+				model: vehicleDetails.model,
+				year: vehicleDetails.year,
+				color: vehicleDetails.color,
+				plate: vehicleDetails.plate,
+				doors: vehicleDetails.doors,
+				motor: vehicleDetails.motor,
+				updatedAt: new Date()
+			},
+		})
+
+		if (!updatedVehicle) {
+			responseStatus = StatusCodes.CONFLICT
+			responseContents = { error: `Vehicle with id ${idVehicle} cannot be updated, check logs, details: ${updatedVehicle}` }
+			logger.error(`[PUT] vehicle.controller/updateVehicle. Vehicle with id ${idVehicle} cannot be updated, check logs: ${updatedVehicle}`)
+			return res.status(responseStatus).send(responseContents)
+		}
+
+		responseContents = { message: 'Vehicle updated successfully', vehicle: updatedVehicle }
+		logger.info(`[PUT] vehicle.controller/updateVehicle. Vehicle with id ${idVehicle} updated successfully.`)
 
 
     } catch (error) {
-        
+		logger.error(`[PUT] vehicle.controller/updateVehicle Internal server error: ${error}`)
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+		responseContents = { error: `[PUT] vehicle.controller/updateVehicle. Internal server error: ${error}` }
+		return res.status(responseStatus).send(responseContents)
     }
+
+	return res.status(responseStatus).send(responseContents)
 }
+
+
 export const deteleVehicle = async (req: Request, res: Response) => {}
 
