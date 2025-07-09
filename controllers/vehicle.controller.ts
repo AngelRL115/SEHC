@@ -367,6 +367,67 @@ export const updateVehicle = async (req: Request, res: Response) => {
 	return res.status(responseStatus).send(responseContents)
 }
 
+//cuando se haga el test o en la implementación real, se debe cambiar el idVehicle por req.params.idVehicle
+// ya que es una práctica RESTful más adecuada para identificar recursos únicos en la URL.
 
-export const deteleVehicle = async (req: Request, res: Response) => {}
+/**
+ * Deletes a vehicle record from the database based on the provided vehicle ID.
+ *
+ * @param {Request} req - Express request object. Expects the `idVehicle` field in the request body.
+ * In RESTful practices, this ID would typically come from the URL path (e.g., `req.params.idVehicle`).
+ *
+ * @param {Response} res - Express response object. Used to return the result of the deletion operation.
+ *
+ * @returns {Promise<Response>} A response indicating the outcome:
+ * - 200 OK with a success message if the vehicle was deleted.
+ * - 400 Bad Request if the `idVehicle` field is missing.
+ * - 404 Not Found if no vehicle with the given ID exists.
+ * - 500 Internal Server Error if an unexpected error occurs during the operation.
+ *
+ * @example
+ *  Example request body:
+ * {
+ *   "idVehicle": "12345"
+ * }
+ *
+ *  Successful response:
+ * {
+ *   "message": "Vehicle with id 12345 deleted successfully"
+ * }
+ */
+export const deleteVehicle = async (req: Request, res: Response) => {
+	const { idVehicle } = req.body; // ideal: usar req.params.idVehicle
+	let responseStatus = StatusCodes.OK;
+	let responseContents;
 
+	try {
+		if (!idVehicle) {
+			responseStatus = StatusCodes.BAD_REQUEST;
+			responseContents = { error: 'idVehicle field required' };
+			logger.warn(`[DELETE] vehicle.controller/deleteVehicle. Missing idVehicle field.`);
+			return res.status(responseStatus).send(responseContents);
+		}
+
+		const vehicle = await prisma.vehicle.findUnique({ where: { idVehicle } });
+
+		if (!vehicle) {
+			responseStatus = StatusCodes.NOT_FOUND;
+			responseContents = { error: `No vehicle found with id: ${idVehicle}` };
+			logger.warn(`[DELETE] vehicle.controller/deleteVehicle. No vehicle found with id: ${idVehicle}`);
+			return res.status(responseStatus).send(responseContents);
+		}
+
+		await prisma.vehicle.delete({ where: { idVehicle } });
+
+		responseContents = { message: `Vehicle with id ${idVehicle} deleted successfully` };
+		logger.info(`[DELETE] vehicle.controller/deleteVehicle. Vehicle with id ${idVehicle} deleted successfully.`);
+
+	} catch (error) {
+		logger.error(`[DELETE] vehicle.controller/deleteVehicle. Internal server error: ${error}`);
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR;
+		responseContents = { error: `[DELETE] vehicle.controller/deleteVehicle. Internal server error: ${error}` };
+		return res.status(responseStatus).send(responseContents);
+	}
+
+	return res.status(responseStatus).send(responseContents);
+}
