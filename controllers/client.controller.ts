@@ -184,10 +184,10 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 			where: { idclient: invoiceDetails.idClient },
 			data: {
 				invoice: invoiceDetails.invoice,
-				socialReazon: invoiceDetails.socialReason,
-				zipcode: invoiceDetails.zipcode,
-				fiscalRegimen: invoiceDetails.fiscalRegimen,
-				email: invoiceDetails.email,
+				socialReazon: invoiceDetails.invoice ? invoiceDetails.socialReason : null,
+				zipcode: invoiceDetails.invoice ? invoiceDetails.zipcode : null,
+				fiscalRegimen: invoiceDetails.invoice ? invoiceDetails.fiscalRegimen : null,
+				email: invoiceDetails.invoice ? invoiceDetails.email : null,
 				updatedAt: new Date()
 			},
 		})
@@ -195,19 +195,6 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 			responseStatus = StatusCodes.NOT_FOUND
 			responseContents = { error: `No client found with ID: ${idClient}. Update cannot be performed` }
 			logger.warn(`[PUT] client.controller/updateClientInvoiceDetails. No client found with ID: ${idClient}. Update cannot be performed`)
-			return res.status(responseStatus).send(responseContents)
-		}
-
-		if (
-			updatedInvoiceData.invoice !== invoice ||
-			updatedInvoiceData.socialReazon !== socialReason ||
-			updatedInvoiceData.zipcode !== zipcode ||
-			updatedInvoiceData.fiscalRegimen !== fiscalRegimen ||
-			updatedInvoiceData.email !== email
-		) {
-			responseStatus = StatusCodes.NOT_ACCEPTABLE
-			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
-			logger.warn(`[PUT] client.controller/updateClientInvoiceDetails. Update failed. Data was not correctly updated for client with ID: ${idClient}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
@@ -279,12 +266,22 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 	}
 
 	try {
+		const existingClient = await prisma.client.findUnique({
+			where: { idclient: personalData.idClient },
+		})
+		if (!existingClient) {
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `No client found with ID: ${personalData.idClient}` }
+			logger.warn(`[PUT] client.controller/updateClientDetails. No client found with ID: ${personalData.idClient}`)
+			return res.status(responseStatus).send(responseContents)
+		}
+
 		const updatedDetails = await prisma.client.update({
 			where: { idclient: personalData.idClient },
 			data: {
-				name: personalData.name,
-				lastName: personalData.lastName,
-				phone: personalData.phone,
+				name: name ? personalData.name : existingClient.name,
+				lastName: lastName ? personalData.lastName : existingClient.lastName,
+				phone: phone ? personalData.phone : existingClient.phone,
 				updatedAt: new Date()
 			},
 		})
@@ -295,14 +292,9 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 			return res.status(responseStatus).send(responseContents)
 		}
 
-		if (updatedDetails.name !== name || updatedDetails.lastName !== lastName || updatedDetails.phone !== phone) {
-			responseStatus = StatusCodes.NOT_ACCEPTABLE
-			responseContents = { error: `Update failed. Data was not correctly updated for client with ID: ${idClient}` }
-			logger.warn(`[PUT] client.controller/updateClientDetails. Update failed. Data was not correctly updated for client with ID: ${idClient}`)
-			return res.status(responseStatus).send(responseContents)
-		}
+		
 
-		responseContents = { message: 'Basic personal information updated' }
+		responseContents = { message: 'Basic personal information updated'}
 		logger.info(`[PUT] client.controller/updateClientDetails. Basic personal information updated for client with ID: ${idClient}`)
 	} catch (error) {
 		logger.error(`[PUT] clientController/updateClientDetails error: ${error}`)
@@ -366,8 +358,8 @@ export const getClientDetails = async (req: Request, res: Response) => {
 
 		if (!clientData) {
 			responseStatus = StatusCodes.NOT_FOUND
-			responseContents = { error: `No client found with ID: ${idClient}` }
-			logger.warn(`[GET] client.controller/getClientDetails. No client found with ID: ${idClient}`)
+			responseContents = { error: `Client not found with ID: ${idClient}` }
+			logger.warn(`[GET] client.controller/getClientDetails. Client not found with ID: ${idClient}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 

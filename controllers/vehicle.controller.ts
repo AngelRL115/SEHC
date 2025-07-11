@@ -6,8 +6,6 @@ import { Vehicle } from '../interfaces/Vehicle'
 import logger from '../logger/logger'
 dotenv.config()
 
-
-
 /**
  * Registers a new vehicle in the database based on the request body fields.
  *
@@ -15,7 +13,7 @@ dotenv.config()
  * @async
  *
  * @param {Request} req - Express request object. The body debe incluir:
- * 
+ *
  * - `idClient` (number) - ID del cliente al que pertenece el vehículo (requerido)
  * - `brand` (string) - Marca del vehículo (requerido)
  * - `model` (string) - Modelo del vehículo (requerido)
@@ -28,7 +26,7 @@ dotenv.config()
  * @param {Response} res - Express response object. Usado para devolver una respuesta al cliente basada en el resultado de la operación.
  *
  * @returns {Promise<Response>} - Retorna una de las siguientes respuestas HTTP:
- * 
+ *
  * - `201 Created`: Vehículo creado exitosamente.
  * - `400 Bad Request`: Faltan campos requeridos en el cuerpo del request.
  * - `409 Conflict`: No se pudo guardar el vehículo.
@@ -127,7 +125,7 @@ export const newVehicle = async (req: Request, res: Response) => {
  * @async
  *
  * @param {Request} req - Express request object. Se espera que el campo `idVehicle` esté presente en el cuerpo (`req.body`) del request.
- * 
+ *
  * @param {Response} res - Express response object. Utilizado para retornar la respuesta HTTP con los detalles del vehículo o un mensaje de error.
  *
  * @returns {Promise<Response>} - Devuelve una respuesta HTTP basada en el resultado de la consulta:
@@ -233,25 +231,27 @@ export const getVehicle = async (req: Request, res: Response) => {
  *   "error": "idClient field required"
  * }
  */
-export const getAllVehiclesFromclient = async (req: Request, res: Response) => {
+export const getAllVehiclesFromClient = async (req: Request, res: Response) => {
 	const { idClient } = req.body
 	let responseStatus = StatusCodes.OK
 	let responseContents
 
 	try {
-		if (!idClient) {
-			responseStatus = StatusCodes.BAD_REQUEST
-			responseContents = { error: 'idClient field required' }
-			logger.warn(`[GET] vehicle.controller/getAllVehiclesFromClient. Missing idClient field.`)
+		const client = await prisma.client.findUnique({ where: { idclient: idClient } })
+
+		if (!client) {
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `Client with id ${idClient} does not exist` }
+			logger.warn(`[GET] vehicle.controller/getAllVehiclesFromClient. Client with id ${idClient} does not exist`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
 		const vehicles = await prisma.vehicle.findMany({ where: { cliente_idcliente: idClient } })
 
-		if (!vehicles) {
+		if (vehicles.length === 0) {
 			responseStatus = StatusCodes.NOT_FOUND
-			responseContents = { error: `Vehicles owned by client id ${idClient} not found` }
-			logger.warn(`[GET] vehicle.controller/getAllVehiclesFromClient. Vehicles owned by client id ${idClient} not found`)
+			responseContents = { error: `Client with id ${idClient} has no vehicles registered` }
+			logger.warn(`[GET] vehicle.controller/getAllVehiclesFromClient. No vehicles found for client id ${idClient}`)
 			return res.status(responseStatus).send(responseContents)
 		}
 
@@ -300,18 +300,17 @@ export const getAllVehiclesFromclient = async (req: Request, res: Response) => {
  * }
  */
 export const updateVehicle = async (req: Request, res: Response) => {
-	const { idVehicle, brand, model, year, color, plate, doors,motor } = req.body
-    let responseStatus = StatusCodes.OK
-    let responseContents
+	const { idVehicle, brand, model, year, color, plate, doors, motor } = req.body
+	let responseStatus = StatusCodes.OK
+	let responseContents
 
-    try {
-
-        if(!idVehicle){
-            responseStatus = StatusCodes.BAD_REQUEST
+	try {
+		if (!idVehicle) {
+			responseStatus = StatusCodes.BAD_REQUEST
 			responseContents = { error: 'idVehicle field required' }
 			logger.warn(`[PUT] vehicle.controller/updateVehicle. Missing idVehicle field.`)
 			return res.status(responseStatus).send(responseContents)
-        }
+		}
 		const vehicle = await prisma.vehicle.findUnique({ where: { idVehicle: idVehicle } })
 
 		if (!vehicle) {
@@ -325,7 +324,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
 			cliente_idcliente: vehicle.cliente_idcliente,
 			brand: brand ? brand : vehicle.brand,
 			model: model ? model : vehicle.model,
-			year : year ? year : vehicle.year,
+			year: year ? year : vehicle.year,
 			color: color ? color : vehicle.color,
 			plate: plate ? plate : vehicle.plate,
 			doors: doors ? doors : vehicle.doors,
@@ -342,7 +341,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
 				plate: vehicleDetails.plate,
 				doors: vehicleDetails.doors,
 				motor: vehicleDetails.motor,
-				updatedAt: new Date()
+				updatedAt: new Date(),
 			},
 		})
 
@@ -355,14 +354,12 @@ export const updateVehicle = async (req: Request, res: Response) => {
 
 		responseContents = { message: 'Vehicle updated successfully', vehicle: updatedVehicle }
 		logger.info(`[PUT] vehicle.controller/updateVehicle. Vehicle with id ${idVehicle} updated successfully.`)
-
-
-    } catch (error) {
+	} catch (error) {
 		logger.error(`[PUT] vehicle.controller/updateVehicle Internal server error: ${error}`)
 		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
 		responseContents = { error: `[PUT] vehicle.controller/updateVehicle. Internal server error: ${error}` }
 		return res.status(responseStatus).send(responseContents)
-    }
+	}
 
 	return res.status(responseStatus).send(responseContents)
 }
@@ -396,38 +393,37 @@ export const updateVehicle = async (req: Request, res: Response) => {
  * }
  */
 export const deleteVehicle = async (req: Request, res: Response) => {
-	const { idVehicle } = req.body; // ideal: usar req.params.idVehicle
-	let responseStatus = StatusCodes.OK;
-	let responseContents;
+	const { idVehicle } = req.body // ideal: usar req.params.idVehicle
+	let responseStatus = StatusCodes.OK
+	let responseContents
 
 	try {
 		if (!idVehicle) {
-			responseStatus = StatusCodes.BAD_REQUEST;
-			responseContents = { error: 'idVehicle field required' };
-			logger.warn(`[DELETE] vehicle.controller/deleteVehicle. Missing idVehicle field.`);
-			return res.status(responseStatus).send(responseContents);
+			responseStatus = StatusCodes.BAD_REQUEST
+			responseContents = { error: 'idVehicle field required' }
+			logger.warn(`[DELETE] vehicle.controller/deleteVehicle. Missing idVehicle field.`)
+			return res.status(responseStatus).send(responseContents)
 		}
 
-		const vehicle = await prisma.vehicle.findUnique({ where: { idVehicle } });
+		const vehicle = await prisma.vehicle.findUnique({ where: { idVehicle } })
 
 		if (!vehicle) {
-			responseStatus = StatusCodes.NOT_FOUND;
-			responseContents = { error: `No vehicle found with id: ${idVehicle}` };
-			logger.warn(`[DELETE] vehicle.controller/deleteVehicle. No vehicle found with id: ${idVehicle}`);
-			return res.status(responseStatus).send(responseContents);
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `No vehicle found with id: ${idVehicle}` }
+			logger.warn(`[DELETE] vehicle.controller/deleteVehicle. No vehicle found with id: ${idVehicle}`)
+			return res.status(responseStatus).send(responseContents)
 		}
 
-		await prisma.vehicle.delete({ where: { idVehicle } });
+		await prisma.vehicle.delete({ where: { idVehicle } })
 
-		responseContents = { message: `Vehicle with id ${idVehicle} deleted successfully` };
-		logger.info(`[DELETE] vehicle.controller/deleteVehicle. Vehicle with id ${idVehicle} deleted successfully.`);
-
+		responseContents = { message: `Vehicle with id ${idVehicle} deleted successfully` }
+		logger.info(`[DELETE] vehicle.controller/deleteVehicle. Vehicle with id ${idVehicle} deleted successfully.`)
 	} catch (error) {
-		logger.error(`[DELETE] vehicle.controller/deleteVehicle. Internal server error: ${error}`);
-		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR;
-		responseContents = { error: `[DELETE] vehicle.controller/deleteVehicle. Internal server error: ${error}` };
-		return res.status(responseStatus).send(responseContents);
+		logger.error(`[DELETE] vehicle.controller/deleteVehicle. Internal server error: ${error}`)
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+		responseContents = { error: `[DELETE] vehicle.controller/deleteVehicle. Internal server error: ${error}` }
+		return res.status(responseStatus).send(responseContents)
 	}
 
-	return res.status(responseStatus).send(responseContents);
+	return res.status(responseStatus).send(responseContents)
 }

@@ -149,7 +149,7 @@ const clientRoutes = (baseRouter: Router) => {
 	 *                                  type: string
 	 *                                  example: (PUT) Internal server error ${error.message}
 	 */
-	clientRouter.put('/updateClientInvoiceDetails', clientController.updateClientInvoiceDetails)
+	clientRouter.patch('/updateClientInvoiceDetails', clientController.updateClientInvoiceDetails)
 
 	/**
 	 * @swagger
@@ -212,7 +212,7 @@ const clientRoutes = (baseRouter: Router) => {
 	 *                                  type: string
 	 *                                  example: (PUT) clientController/updateClientDetails error ${error.message}
 	 */
-	clientRouter.put('/updateClientDetails', clientController.updateClientDetails)
+	clientRouter.patch('/updateClientDetails', clientController.updateClientDetails)
 
 	/**
 	 * @swagger
