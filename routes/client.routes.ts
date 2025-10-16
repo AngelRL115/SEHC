@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import * as clientController from '../controllers/client.controller'
+import { cli } from 'winston/lib/winston/config'
 
 
 const clientRouter = Router()
@@ -363,6 +364,8 @@ const clientRoutes = (baseRouter: Router) => {
 	 */
 
 	clientRouter.get('/getAllClients', clientController.getAllClients)
+
+	clientRouter.post('/deleteClient', clientController.deleteClient)
 }
 
 export default clientRoutes

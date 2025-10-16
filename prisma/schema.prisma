@@ -62,7 +62,7 @@ model client {
   lastName      String   @db.VarChar(45)
   phone         String   @db.VarChar(45)
   invoice       Boolean
-  socialReazon  String?  @db.VarChar(100)
+  socialReason  String?  @db.VarChar(255)
   zipcode       String?  @db.VarChar(10)
   fiscalRegimen String?  @db.VarChar(45)
   email         String?  @db.VarChar(45)

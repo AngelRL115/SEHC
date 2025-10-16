@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `sehc`.`client` (
   `lastName` VARCHAR(45) NOT NULL,
   `phone` VARCHAR(45) NOT NULL,
   `invoice` TINYINT(1) NOT NULL,
-  `socialReazon` VARCHAR(100) NULL,
+  `socialReason` VARCHAR(100) NULL,
   `zipcode` VARCHAR(10) NULL,
   `fiscalRegimen` VARCHAR(45) NULL,
   `email` VARCHAR(45) NULL,

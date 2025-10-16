@@ -92,13 +92,13 @@ export const newClient = async (req: Request, res: Response) => {
 	}
 
 	try {
-		await prisma.client.create({
+		const userCreated = await prisma.client.create({
 			data: {
 				name: newClient.name,
 				lastName: newClient.lastName,
 				phone: newClient.phone,
 				invoice: newClient.invoice,
-				socialReazon: newClient.socialReason,
+				socialReason: newClient.socialReason,
 				zipcode: newClient.zipcode,
 				fiscalRegimen: newClient.fiscalRegimen,
 				email: newClient.email,
@@ -107,7 +107,9 @@ export const newClient = async (req: Request, res: Response) => {
 			},
 		})
 
-		responseContents = { message: 'Client Registered successfully' }
+		console.log(userCreated)
+
+		responseContents = { message: 'Client Registered successfully', clientId: userCreated.idclient }
 		logger.info(`[POST] client.controller/newClient. Client Registered successfully with name: ${newClient.name} ${newClient.lastName}`)
 	} catch (error) {
 		logger.error(`[POST] clientController/newClient error: ${error}`)
@@ -184,7 +186,7 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
 			where: { idclient: invoiceDetails.idClient },
 			data: {
 				invoice: invoiceDetails.invoice,
-				socialReazon: invoiceDetails.invoice ? invoiceDetails.socialReason : null,
+				socialReason: invoiceDetails.invoice ? invoiceDetails.socialReason : null,
 				zipcode: invoiceDetails.invoice ? invoiceDetails.zipcode : null,
 				fiscalRegimen: invoiceDetails.invoice ? invoiceDetails.fiscalRegimen : null,
 				email: invoiceDetails.invoice ? invoiceDetails.email : null,
@@ -254,7 +256,7 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
  * }
  */
 export const updateClientDetails = async (req: Request, res: Response) => {
-	const { idClient, name, lastName, phone } = req.body
+	const { idClient, name, lastName, phone, invoice, socialReason, zipcode, fiscalRegimen, email} = req.body
 	let responseStatus = StatusCodes.OK
 	let responseContents
 
@@ -263,6 +265,15 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 		name,
 		lastName,
 		phone,
+	}
+
+	const invoiceData: InvoiceData = {
+		idClient,
+		invoice,
+		socialReason,
+		zipcode,
+		fiscalRegimen,
+		email,
 	}
 
 	try {
@@ -282,6 +293,11 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 				name: name ? personalData.name : existingClient.name,
 				lastName: lastName ? personalData.lastName : existingClient.lastName,
 				phone: phone ? personalData.phone : existingClient.phone,
+				invoice: invoiceData.invoice !== undefined ? invoiceData.invoice : existingClient.invoice,
+				socialReason: invoiceData.invoice ? invoiceData.socialReason : (invoiceData.invoice === false ? null : existingClient.socialReason),
+				zipcode: invoiceData.invoice ? invoiceData.zipcode : (invoiceData.invoice === false ? null : existingClient.zipcode),
+				fiscalRegimen: invoiceData.invoice ? invoiceData.fiscalRegimen : (invoiceData.invoice === false ? null : existingClient.fiscalRegimen),
+				email: invoiceData.invoice ? invoiceData.email : (invoiceData.invoice === false ? null : existingClient.email),
 				updatedAt: new Date()
 			},
 		})
@@ -294,7 +310,7 @@ export const updateClientDetails = async (req: Request, res: Response) => {
 
 		
 
-		responseContents = { message: 'Basic personal information updated'}
+		responseContents = { message: 'Personal information updated'}
 		logger.info(`[PUT] client.controller/updateClientDetails. Basic personal information updated for client with ID: ${idClient}`)
 	} catch (error) {
 		logger.error(`[PUT] clientController/updateClientDetails error: ${error}`)
@@ -441,4 +457,44 @@ export const getAllClients = async (req: Request, res: Response) => {
 	}
 
 	return res.status(responseStatus).send(responseContents)
+}
+
+export const deleteClient = async (req: Request, res: Response) => {
+    const { idClient } = req.body
+    let responseStatus = StatusCodes.OK
+    let responseContents
+
+    try {
+        // Primero elimina los vehículos asociados
+        const deleteVehicles = await prisma.vehicle.deleteMany({
+            where: { cliente_idcliente: idClient },
+        })
+
+        if (deleteVehicles.count > 0) {
+            logger.info(`[DELETE] client.controller/deleteClient. Also deleted ${deleteVehicles.count} vehicles associated with client ID: ${idClient}`)
+        }
+
+        // Ahora elimina el cliente
+        const deleteClient = await prisma.client.delete({
+            where: { idclient: idClient },
+        })
+
+        if (!deleteClient) {
+            responseStatus = StatusCodes.NOT_FOUND
+            responseContents = { error: `Client not found with ID: ${idClient}` }
+            logger.warn(`[DELETE] client.controller/deleteClient. Client not found with ID: ${idClient}`)
+            return res.status(responseStatus).send(responseContents)
+        }
+
+        logger.info(`[DELETE] client.controller/deleteClient. Client with ID: ${idClient} deleted successfully`)
+        responseContents = { message: `Client with ID: ${idClient} deleted successfully. Also deleted ${deleteVehicles.count} vehicles associated with client ID: ${idClient}` }
+
+    } catch (error) {
+        logger.error(`[DELETE] clientController/deleteClient error: ${error}`)
+        responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+        responseContents = { error: `[DELETE] clientController/deleteClient. Internal server error: ${error}` }
+        return res.status(responseStatus).send(responseContents)
+    }
+
+    return res.status(responseStatus).send(responseContents)
 }
