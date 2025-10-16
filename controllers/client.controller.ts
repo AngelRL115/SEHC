@@ -256,71 +256,59 @@ export const updateClientInvoiceDetails = async (req: Request, res: Response) =>
  * }
  */
 export const updateClientDetails = async (req: Request, res: Response) => {
-	const { idClient, name, lastName, phone, invoice, socialReason, zipcode, fiscalRegimen, email} = req.body
-	let responseStatus = StatusCodes.OK
-	let responseContents
+    const { idClient, ...updateData } = req.body;
 
-	const personalData: ClientPersonalData = {
-		idClient,
-		name,
-		lastName,
-		phone,
-	}
+    if (!idClient) {
+        return res.status(StatusCodes.BAD_REQUEST).send({ error: 'idClient is required' });
+    }
 
-	const invoiceData: InvoiceData = {
-		idClient,
-		invoice,
-		socialReason,
-		zipcode,
-		fiscalRegimen,
-		email,
-	}
+    try {
+        const existingClient = await prisma.client.findUnique({
+            where: { idclient: idClient },
+        });
 
-	try {
-		const existingClient = await prisma.client.findUnique({
-			where: { idclient: personalData.idClient },
-		})
-		if (!existingClient) {
-			responseStatus = StatusCodes.NOT_FOUND
-			responseContents = { error: `No client found with ID: ${personalData.idClient}` }
-			logger.warn(`[PUT] client.controller/updateClientDetails. No client found with ID: ${personalData.idClient}`)
-			return res.status(responseStatus).send(responseContents)
-		}
+        if (!existingClient) {
+            logger.warn(`[PATCH] client.controller/updateClientDetails. No client found with ID: ${idClient}`);
+            return res.status(StatusCodes.NOT_FOUND).send({ error: `No client found with ID: ${idClient}` });
+        }
 
-		const updatedDetails = await prisma.client.update({
-			where: { idclient: personalData.idClient },
-			data: {
-				name: name ? personalData.name : existingClient.name,
-				lastName: lastName ? personalData.lastName : existingClient.lastName,
-				phone: phone ? personalData.phone : existingClient.phone,
-				invoice: invoiceData.invoice !== undefined ? invoiceData.invoice : existingClient.invoice,
-				socialReason: invoiceData.invoice ? invoiceData.socialReason : (invoiceData.invoice === false ? null : existingClient.socialReason),
-				zipcode: invoiceData.invoice ? invoiceData.zipcode : (invoiceData.invoice === false ? null : existingClient.zipcode),
-				fiscalRegimen: invoiceData.invoice ? invoiceData.fiscalRegimen : (invoiceData.invoice === false ? null : existingClient.fiscalRegimen),
-				email: invoiceData.invoice ? invoiceData.email : (invoiceData.invoice === false ? null : existingClient.email),
-				updatedAt: new Date()
-			},
-		})
-		if (!updatedDetails) {
-			responseStatus = StatusCodes.CONFLICT
-			responseContents = { error: `Update cannot be performed see log details ${updatedDetails}` }
-			logger.warn(`[PUT] client.controller/updateClientDetails. Update cannot be performed see log details ${updatedDetails}`)
-			return res.status(responseStatus).send(responseContents)
-		}
+        const dataToUpdate: any = {};
 
-		
+        // Only include fields that are present in the request body
+        for (const key in updateData) {
+            if (Object.prototype.hasOwnProperty.call(updateData, key)) {
+                dataToUpdate[key] = updateData[key];
+            }
+        }
+        
+        // If invoice is set to false, nullify the invoice-related fields
+        if (updateData.invoice === false) {
+            dataToUpdate.socialReason = null;
+            dataToUpdate.zipcode = null;
+            dataToUpdate.fiscalRegimen = null;
+            dataToUpdate.email = null;
+        }
 
-		responseContents = { message: 'Personal information updated'}
-		logger.info(`[PUT] client.controller/updateClientDetails. Basic personal information updated for client with ID: ${idClient}`)
-	} catch (error) {
-		logger.error(`[PUT] clientController/updateClientDetails error: ${error}`)
-		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
-		responseContents = { error: `[PUT] clientController/updateClientDetails. Internal server error: ${error}` }
-		return res.status(responseStatus).send(responseContents)
-	}
+        if (Object.keys(dataToUpdate).length === 0) {
+            return res.status(StatusCodes.OK).send({ message: 'No changes to update.' });
+        }
 
-	return res.status(responseStatus).send(responseContents)
-}
+        dataToUpdate.updatedAt = new Date();
+
+        const updatedClient = await prisma.client.update({
+            where: { idclient: idClient },
+            data: dataToUpdate,
+        });
+
+        logger.info(`[PATCH] client.controller/updateClientDetails. Client with ID: ${idClient} updated successfully.`);
+        return res.status(StatusCodes.OK).send({ message: 'Client information updated', client: updatedClient });
+
+    } catch (error) {
+        logger.error(`[PATCH] client.controller/updateClientDetails error: ${error}`);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ error: `Internal server error: ${error}` });
+    }
+};
+
 
 /**
  * Retrieves client details from the database using the provided `idClient`.
