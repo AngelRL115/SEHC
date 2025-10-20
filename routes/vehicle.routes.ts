@@ -8,6 +8,7 @@ const vehicleRoutes = (baseRouter: Router) =>{
 
     vehicleRouter.post('/newVehicle', vehicleController.newVehicle)
     vehicleRouter.get('/getVehicle', vehicleController.getVehicle)
+    vehicleRouter.get('/getAllVehicles', vehicleController.getAllVehicles)
     vehicleRouter.get('/getAllVehiclesFromClient', vehicleController.getAllVehiclesFromClient)
     vehicleRouter.patch('/updateVehicle/', vehicleController.updateVehicle)
     vehicleRouter.delete('/deleteVehicle', vehicleController.deleteVehicle)

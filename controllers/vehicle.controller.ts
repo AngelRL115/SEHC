@@ -190,6 +190,31 @@ export const getVehicle = async (req: Request, res: Response) => {
 	return res.status(responseStatus).send(responseContents)
 }
 
+export const getAllVehicles = async (req: Request, res: Response) => {
+	let responseStatus = StatusCodes.OK
+	let responseContents
+
+	try {
+		const vehicles = await prisma.vehicle.findMany()
+
+		if (vehicles.length === 0) {
+			responseStatus = StatusCodes.NOT_FOUND
+			responseContents = { error: `No vehicles found in the database` }
+			logger.warn(`[GET] vehicle.controller/getAllVehicles. No vehicles found in the database`)
+			return res.status(responseStatus).send(responseContents)
+		}
+
+		responseContents = vehicles
+	} catch (error) {
+		logger.error(`[GET] vehicle.controller/getAllVehicles Internal server error: ${error}`)
+		responseStatus = StatusCodes.INTERNAL_SERVER_ERROR
+		responseContents = { error: `[GET] vehicle.controller/getAllVehicles. Internal server error: ${error}` }
+		return res.status(responseStatus).send(responseContents)
+	}
+
+	return res.status(responseStatus).send(responseContents)
+}
+
 /**
  * Retrieves all vehicles associated with a specific client from the database.
  *
