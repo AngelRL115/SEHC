@@ -316,9 +316,7 @@ export const updateClientDetails = async (req: Request, res: Response) => {
  * @function getClientDetails
  * @async
  *
- * @param {Request} req - Express request object. The body must include:
- * 
- * - `idClient` (number) - Unique identifier of the client to retrieve (required)
+ * @param {Request} req - Express request object. Expects `idClient` as a route parameter.
  *
  * @param {Response} res - Express response object used to return the client details or error information.
  *
@@ -329,10 +327,8 @@ export const updateClientDetails = async (req: Request, res: Response) => {
  * - `500 Internal Server Error`: Unexpected error during the retrieval process.
  *
  * @example
- *  Request body:
- * {
- *   "idClient": 7
- * }
+ *  Request URL:
+ *  GET /client/getClientDetails/7
  *
  *  Success response:
  * {
@@ -351,7 +347,7 @@ export const updateClientDetails = async (req: Request, res: Response) => {
  * }
  */
 export const getClientDetails = async (req: Request, res: Response) => {
-	const { idClient } = req.body
+	const idClient = parseInt(req.params.idClient)
 	let responseStatus = StatusCodes.OK
 	let responseContents
 
@@ -448,7 +444,7 @@ export const getAllClients = async (req: Request, res: Response) => {
 }
 
 export const deleteClient = async (req: Request, res: Response) => {
-    const { idClient } = req.body
+    const idClient = parseInt(req.params.idClient)
     let responseStatus = StatusCodes.OK
     let responseContents
 

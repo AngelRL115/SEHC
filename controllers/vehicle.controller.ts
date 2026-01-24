@@ -124,7 +124,7 @@ export const newVehicle = async (req: Request, res: Response) => {
  * @function getVehicle
  * @async
  *
- * @param {Request} req - Express request object. Se espera que el campo `idVehicle` esté presente en el cuerpo (`req.body`) del request.
+ * @param {Request} req - Express request object. Se espera que `idVehicle` esté presente como parámetro de ruta.
  *
  * @param {Response} res - Express response object. Utilizado para retornar la respuesta HTTP con los detalles del vehículo o un mensaje de error.
  *
@@ -136,10 +136,8 @@ export const newVehicle = async (req: Request, res: Response) => {
  * - `500 Internal Server Error`: Si ocurre un error inesperado durante la operación.
  *
  * @example
- *  Request body:
- * {
- *   "idVehicle": 42
- * }
+ *  Request URL:
+ *  GET /vehicle/getVehicle/42
  *
  *  Success response:
  * {
@@ -158,7 +156,7 @@ export const newVehicle = async (req: Request, res: Response) => {
  * }
  */
 export const getVehicle = async (req: Request, res: Response) => {
-	const { idVehicle } = req.body
+	const idVehicle = parseInt(req.params.idVehicle)
 	let responseStatus = StatusCodes.OK
 	let responseContents
 
@@ -221,8 +219,8 @@ export const getAllVehicles = async (req: Request, res: Response) => {
  * @function getAllVehiclesFromclient
  * @async
  *
- * @param {Request} req - Express request object. Se espera que el campo `idClient` esté presente en `req.body`
- * para identificar al cliente cuyos vehículos se quieren recuperar.
+ * @param {Request} req - Express request object. Se espera que `idClient` esté presente como parámetro de ruta
+ * para identificar al cliente.
  *
  * @param {Response} res - Express response object. Usado para devolver la lista de vehículos, o un mensaje
  * de error si la operación falla.
@@ -235,10 +233,8 @@ export const getAllVehicles = async (req: Request, res: Response) => {
  * - `500 Internal Server Error`: Si ocurrió un error durante la consulta a la base de datos.
  *
  * @example
- *  Request body:
- * {
- *   "idClient": 7
- * }
+ *  Request URL:
+ *  GET /vehicle/getAllVehiclesFromClient/7
  *
  *  Success response:
  * [
@@ -257,7 +253,7 @@ export const getAllVehicles = async (req: Request, res: Response) => {
  * }
  */
 export const getAllVehiclesFromClient = async (req: Request, res: Response) => {
-	const { idClient } = req.body
+	const idClient = parseInt(req.params.idClient)
 	let responseStatus = StatusCodes.OK
 	let responseContents
 
@@ -418,7 +414,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
  * }
  */
 export const deleteVehicle = async (req: Request, res: Response) => {
-	const { idVehicle } = req.body // ideal: usar req.params.idVehicle
+	const idVehicle = parseInt(req.params.idVehicle)
 	let responseStatus = StatusCodes.OK
 	let responseContents
 

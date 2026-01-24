@@ -8,6 +8,7 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
 import log, {morganStream} from './logger/logger'
 import * as dotenv from 'dotenv'
+import path from 'path'
 
 dotenv.config()
 
@@ -54,7 +55,7 @@ const swaggerOptions = {
 			},
 		],
 	},
-	apis: ['./routes/*.ts'], // Indica la ubicación de tus rutas para generar la documentación
+	apis: [path.join(__dirname, './routes/*.ts')], // Indica la ubicación de tus rutas para generar la documentación
 }
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions)
