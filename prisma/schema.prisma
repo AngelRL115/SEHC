@@ -22,6 +22,7 @@ model service {
   serviceNotes                    String?  @db.VarChar(1000)
   createdAt                       DateTime @default(now()) @db.Timestamp(0)
   updatedAt                       DateTime @default(now()) @db.Timestamp(0)
+  inventoryItems                  ServiceInventoryItem[]
 
   @@index([User_idUser], map: "fk_Service_User1_idx")
   @@index([Vehicle_idVehicle], map: "fk_Service_Vehicle1_idx")
@@ -52,22 +53,24 @@ model vehicle {
   motor             String   @db.VarChar(45)
   createdAt         DateTime @default(now()) @db.Timestamp(0)
   updatedAt         DateTime @default(now()) @db.Timestamp(0)
+  client            client   @relation(fields: [cliente_idcliente], references: [idclient])
 
   @@index([cliente_idcliente], map: "fk_vehicle_cliente1_idx")
 }
 
 model client {
-  idclient      Int      @id @unique(map: "idcliente_UNIQUE") @default(autoincrement())
-  name          String   @db.VarChar(45)
-  lastName      String   @db.VarChar(45)
-  phone         String   @db.VarChar(45)
+  idclient      Int       @id @unique(map: "idcliente_UNIQUE") @default(autoincrement())
+  name          String    @db.VarChar(45)
+  lastName      String    @db.VarChar(45)
+  phone         String    @db.VarChar(45)
   invoice       Boolean
-  socialReason  String?  @db.VarChar(255)
-  zipcode       String?  @db.VarChar(10)
-  fiscalRegimen String?  @db.VarChar(45)
-  email         String?  @db.VarChar(45)
-  createdAt     DateTime @default(now()) @db.Timestamp(0)
-  updatedAt     DateTime @default(now()) @db.Timestamp(0)
+  socialReason  String?   @db.VarChar(255)
+  zipcode       String?   @db.VarChar(10)
+  fiscalRegimen String?   @db.VarChar(45)
+  email         String?   @db.VarChar(45)
+  createdAt     DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime  @default(now()) @db.Timestamp(0)
+  vehicles      vehicle[]
 }
 
 model priority {
@@ -82,6 +85,27 @@ model service_status {
   status           String   @db.VarChar(45)
   createdAt        DateTime @default(now()) @db.Timestamp(0)
   updatedAt        DateTime @default(now()) @db.Timestamp(0)
+}
+
+model InventoryItem {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String?  @db.VarChar(1000)
+  quantity    Int
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  services    ServiceInventoryItem[]
+}
+
+model ServiceInventoryItem {
+  id              Int           @id @default(autoincrement())
+  service         service       @relation(fields: [serviceId], references: [idService])
+  serviceId       Int
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItemId Int
+  quantity        Int
+  @@unique([serviceId, inventoryItemId])
 }
 
 model service_type {
