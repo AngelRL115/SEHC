@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 import express from 'express'
 import baseRouter from './routes/baseRouter'
 import bodyParser from 'body-parser'
@@ -7,14 +10,11 @@ import morgan from 'morgan'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
 import { swaggerOptions } from './config/swagger'
-import log, {morganStream} from './logger/logger'
-import * as dotenv from 'dotenv'
-
-dotenv.config()
+import log, { morganStream } from './logger/logger'
 
 const app = express()
 const PORT = process.env.PORT || 3000
-const logger = morgan('combined', {stream: morganStream})
+const logger = morgan('combined', { stream: morganStream })
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
