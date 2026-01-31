@@ -6,9 +6,9 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJsdoc from 'swagger-jsdoc'
+import { swaggerOptions } from './config/swagger'
 import log, {morganStream} from './logger/logger'
 import * as dotenv from 'dotenv'
-import path from 'path'
 
 dotenv.config()
 
@@ -24,39 +24,6 @@ app.use(logger)
 app.use(bodyParser.json({ limit: '100mb' }))
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }))
 app.disable('x-powered-by')
-
-const swaggerOptions = {
-	definition: {
-		openapi: '3.0.0',
-		info: {
-			title: 'API documentation for SEHC',
-			version: '1.0.0',
-			description: 'Documentacion de los endpoints para el sistema de control de taller especializado honda',
-		},
-		servers: [
-			{
-				url: 'http://localhost:3000/SEHC', //cuando el server este en la nube cambiar esto por la url del servicio
-			},
-		],
-		components: {
-			securitySchemes: {
-				Bearer: {
-					type: 'http',
-					scheme: 'bearer',
-					bearerFormat: 'JWT',
-					description: 'Ingresa el token generado en el metodo login'
-				},
-			}
-			
-		},
-		security: [
-			{
-				Bearer: []
-			},
-		],
-	},
-	apis: [path.join(__dirname, './routes/*.ts')], // Indica la ubicación de tus rutas para generar la documentación
-}
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions)
 
